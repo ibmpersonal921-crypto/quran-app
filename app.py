@@ -34,7 +34,7 @@ with st.sidebar:
 # ---------------------------------------------------------------------------
 top_l, top_r = st.columns([3, 2])
 with top_l:
-    page_header("Dashboard", "Welcome back — here's your study space for today.", "🏠")
+    page_header("Dashboard", "Welcome back — here's your study space for today.", "")
 with top_r:
     st.write("")
     quick_q = st.text_input(
@@ -75,8 +75,14 @@ st.write("")
 # ---------------------------------------------------------------------------
 # Verse of the Day
 # ---------------------------------------------------------------------------
-with st.spinner("Loading today's verse..."):
-    verse = quran_api.get_verse_of_the_day()
+verse = None
+try:
+    with st.spinner("Loading today's verse..."):
+        verse = quran_api.get_verse_of_the_day()
+except Exception:
+    st.warning("Couldn't reach the Quran API right now — check your internet connection and reload.")
+
+if verse:
     st.markdown('<div class="qsc-card">', unsafe_allow_html=True)
     st.markdown(
         f"""
@@ -95,7 +101,7 @@ with st.spinner("Loading today's verse..."):
             unsafe_allow_html=True,
         )
     st.markdown(f'<p style="color:#f4f7f5;">{verse.get("english", "")}</p>', unsafe_allow_html=True)
-    with st.expander("🇵 Show Urdu translation"):
+    with st.expander("🇵🇰 Show Urdu translation"):
         st.markdown(f'<div class="urdu-text">{verse.get("urdu", "")}</div>', unsafe_allow_html=True)
     
     colA, colB = st.columns([1, 5])
@@ -108,15 +114,13 @@ with st.spinner("Loading today's verse..."):
             )
             st.success("Added to today's goals!")
             st.rerun()
-    else:
-        st.warning("Couldn't reach the Quran API right now — check your internet connection and reload.")
     st.markdown("</div>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------------------------
 # Daily goals
 # ---------------------------------------------------------------------------
 st.markdown('<div class="qsc-card">', unsafe_allow_html=True)
-st.markdown('<span class="qsc-label">Today\'s goals</span>', unsafe_allow_html=True)
+st.markdown('<span class="qsc-label">Today's goals</span>', unsafe_allow_html=True)
 st.write("")
 
 with st.form("add_goal_form", clear_on_submit=True):
@@ -159,6 +163,6 @@ l1, l2, l3 = st.columns(3)
 with l1:
     st.markdown('<div class="qsc-card qsc-card-tight">📖 <b>Browse Quran</b><br><span style="color:#7e9186;font-size:0.85rem;">Read every surah with audio & translation</span></div>', unsafe_allow_html=True)
 with l2:
-    st.markdown('<div class="qsc-card qsc-card-tight">🤖 <b>AI Companion</b><br><span style="color:#7e9186;font-size:0.85rem;">Ask about a verse, hadith, or topic</span></div>', unsafe_allow_html=True)
+    st.markdown('<div class="qsc-card qsc-card-tight"> <b>AI Companion</b><br><span style="color:#7e9186;font-size:0.85rem;">Ask about a verse, hadith, or topic</span></div>', unsafe_allow_html=True)
 with l3:
     st.markdown('<div class="qsc-card qsc-card-tight">🎙️ <b>Recitation Coach</b><br><span style="color:#7e9186;font-size:0.85rem;">Practice and get pronunciation feedback</span></div>', unsafe_allow_html=True)
