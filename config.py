@@ -103,12 +103,35 @@ HADITH_COLLECTIONS = {
 }
 
 # ---------------------------------------------------------------------------
-# AI chatbot (Claude API)
+# AI chatbot — Gemini (free tier, default) or Claude (paid, if you add credits)
 # ---------------------------------------------------------------------------
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
-# Haiku 4.5 is the cheapest current model with near-frontier quality — good
-# default for a student project. Swap to "claude-sonnet-5" for higher quality
-# at higher cost. See README for how to get a key / free trial credit.
+def _resolve_key(name: str) -> str:
+    """Check os.environ (.env locally, or Streamlit Cloud root-level secrets —
+    those are exposed as env vars automatically) and st.secrets directly."""
+    key = os.getenv(name, "")
+    if key:
+        return key
+    try:
+        import streamlit as st
+
+        return st.secrets.get(name, "")
+    except Exception:
+        return ""
+
+
+# "gemini" (default — free tier, no card needed) or "anthropic" (paid, if you
+# add credits at console.anthropic.com). Flip with the AI_PROVIDER env var —
+# no code changes needed either way.
+AI_PROVIDER = os.getenv("AI_PROVIDER", "gemini").lower()
+
+GEMINI_API_KEY = _resolve_key("GEMINI_API_KEY")
+# "gemini-flash-latest" is an alias Google repoints at their current best
+# Flash model — safer than hardcoding a version that gets deprecated.
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-flash-latest")
+
+ANTHROPIC_API_KEY = _resolve_key("ANTHROPIC_API_KEY")
+# Haiku 4.5 is the cheapest current Claude model — only used if
+# AI_PROVIDER=anthropic and you've added credits.
 CHAT_MODEL = os.getenv("CLAUDE_MODEL", "claude-haiku-4-5-20251001")
 CHAT_MAX_TOKENS = 1000
 
