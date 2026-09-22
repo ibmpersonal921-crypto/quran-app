@@ -4,10 +4,13 @@ services/quran_api.py
 Thin, cached wrapper around the free, unauthenticated Al Quran Cloud API
 (https://alquran.cloud/api) and its media CDN (https://alquran.cloud/cdn).
 
-Every function degrades gracefully (returns None / [] and lets the caller
-show a friendly message) instead of crashing the app if the network call
-fails — important since this app has no fallback local copy of the Quran.
+Every function degrades gracefully (returns None / [] / {} and lets the
+caller show a friendly message) instead of crashing the app if the
+network call fails — important since this app has no fallback local
+copy of the Quran.
 """
+
+import datetime as _dt
 
 import requests
 import streamlit as st
@@ -17,13 +20,19 @@ from config import (
     QURAN_CDN_BASE,
     ARABIC_EDITION,
     DEFAULT_TRANSLATION,
+    DEFAULT_TRANSLITERATION,
     VERSE_OF_DAY_POOL,
 )
 
 TIMEOUT = 10
 
 
+# ---------------------------------------------------------------------------
+# Low-level helper
+# ---------------------------------------------------------------------------
 def _get(url: str, params: dict = None):
+    """GET a URL, return the API's `data` payload on success, else None.
+    Never raises — every caller can safely treat None as 'unavailable'."""
     try:
         r = requests.get(url, params=params, timeout=TIMEOUT)
         r.raise_for_status()
@@ -35,6 +44,9 @@ def _get(url: str, params: dict = None):
         return None
 
 
+# ---------------------------------------------------------------------------
+# Surah list / single-edition text
+# ---------------------------------------------------------------------------
 @st.cache_data(ttl=60 * 60 * 24, show_spinner=False)
 def get_surah_list() -> list:
     """All 114 surahs with number, name, English name, ayah count, revelation type."""
@@ -45,14 +57,14 @@ def get_surah_list() -> list:
 @st.cache_data(ttl=60 * 60 * 24, show_spinner=False)
 def get_surah_text(surah_number: int, edition: str = ARABIC_EDITION) -> dict:
     """Full surah text for one edition (Arabic script or a translation)."""
-    return _get(f"{QURAN_API_BASE}/surah/{surah_number}/{edition}")
+    return _get(f"{QURAN_API_BASE}/surah/{surah_number}/{edition}") or {}
 
 
 @st.cache_data(ttl=60 * 60 * 24, show_spinner=False)
 def get_surah_bilingual(surah_number: int, translation_edition: str = DEFAULT_TRANSLATION) -> dict:
     """
-    Returns {"arabic": [...ayahs...], "translation": [...ayahs...]} aligned
-    by index, so the UI can show them side by side.
+    Returns {"surah_meta": {...}, "arabic": [...ayahs...], "translation": [...ayahs...]}
+    aligned by index, so the UI can show them side by side.
     """
     arabic = get_surah_text(surah_number, ARABIC_EDITION)
     translation = get_surah_text(surah_number, translation_edition)
@@ -66,44 +78,65 @@ def get_surah_bilingual(surah_number: int, translation_edition: str = DEFAULT_TR
 
 
 @st.cache_data(ttl=60 * 60 * 24, show_spinner=False)
+def get_surah_full_multilang(surah_number: int, translation_edition: str = DEFAULT_TRANSLATION) -> dict:
+    """
+    Fetch a full surah in three editions at once — Arabic/Uthmani text,
+    the user's chosen translation, and transliteration — in a single
+    request via Al Quran Cloud's multi-edition endpoint:
+        GET /v1/surah/{surah}/editions/{ed1},{ed2},{ed3}
+
+    Used by the Browse Quran page. Returns:
+        {
+            "meta": {name, englishName, englishNameTranslation,
+                     revelationType, numberOfAyahs},
+            "arabic": [ {...ayah...}, ... ],
+            "translation": [ {...ayah...}, ... ],
+            "transliteration": [ {...ayah...}, ... ],
+        }
+    or {} on failure (caller shows a friendly error + st.stop()).
+    """
+    editions = f"{ARABIC_EDITION},{translation_edition},{DEFAULT_TRANSLITERATION}"
+    data = _get(f"{QURAN_API_BASE}/surah/{surah_number}/editions/{editions}")
+
+    if not data or len(data) < 3:
+        return {}
+
+    arabic_ed, translation_ed, translit_ed = data[0], data[1], data[2]
+
+    meta = {
+        "name": arabic_ed.get("name"),
+        "englishName": arabic_ed.get("englishName"),
+        "englishNameTranslation": arabic_ed.get("englishNameTranslation"),
+        "revelationType": arabic_ed.get("revelationType"),
+        "numberOfAyahs": arabic_ed.get("numberOfAyahs", len(arabic_ed.get("ayahs", []))),
+    }
+
+    return {
+        "meta": meta,
+        "arabic": arabic_ed.get("ayahs", []),
+        "translation": translation_ed.get("ayahs", []),
+        "transliteration": translit_ed.get("ayahs", []),
+    }
+
+
+# ---------------------------------------------------------------------------
+# Single ayah
+# ---------------------------------------------------------------------------
+@st.cache_data(ttl=60 * 60 * 24, show_spinner=False)
 def get_ayah(surah_number: int, ayah_number: int, edition: str = ARABIC_EDITION) -> dict:
     """Single ayah, referenced as 'surah:ayah' (e.g. '2:255')."""
-    return _get(f"{QURAN_API_BASE}/ayah/{surah_number}:{ayah_number}/{edition}")
-
-
-@st.cache_data(ttl=60 * 60 * 6, show_spinner=False)
-def search_quran(keyword: str, edition: str = DEFAULT_TRANSLATION, surah: str = "all") -> list:
-    """Keyword search across the Quran translation text. Returns list of matches."""
-    if not keyword.strip():
-        return []
-    data = _get(f"{QURAN_API_BASE}/search/{keyword}/{surah}/{edition}")
-    if not data:
-        return []
-    return data.get("matches", [])
-
-
-def get_ayah_audio_url(global_ayah_number: int, reciter: str = "ar.alafasy", bitrate: int = 128) -> str:
-    """
-    Direct CDN mp3 for a single ayah. global_ayah_number is the ayah's
-    position across the whole Quran (1-6236) — every ayah object returned
-    by the API includes this as `number`.
-    """
-    return f"{QURAN_CDN_BASE}/audio/{bitrate}/{reciter}/{global_ayah_number}.mp3"
-
-
-def get_surah_audio_url(surah_number: int, reciter: str = "ar.alafasy", bitrate: int = 128) -> str:
-    """Direct CDN mp3 for a full surah recitation."""
-    return f"{QURAN_CDN_BASE}/audio-surah/{bitrate}/{reciter}/{surah_number}.mp3"
+    return _get(f"{QURAN_API_BASE}/ayah/{surah_number}:{ayah_number}/{edition}") or {}
 
 
 @st.cache_data(ttl=60 * 60 * 24, show_spinner=False)
 def get_ayah_multilang(surah_number: int, ayah_number: int) -> dict:
-    """Arabic + English + Urdu text for one ayah — used by the AI chatbot
-    to ground answers and by the dashboard's Verse of the Day card."""
+    """Arabic + English + Urdu + transliteration for one ayah — used by the
+    AI chatbot to ground answers, by Recitation Coach, and by the
+    dashboard's Verse of the Day card."""
     arabic = get_ayah(surah_number, ayah_number, ARABIC_EDITION)
     english = get_ayah(surah_number, ayah_number, DEFAULT_TRANSLATION)
     urdu = get_ayah(surah_number, ayah_number, "ur.jalandhry")
-    transliteration = get_ayah(surah_number, ayah_number, "en.transliteration")
+    transliteration = get_ayah(surah_number, ayah_number, DEFAULT_TRANSLITERATION)
     return {
         "arabic": arabic.get("text") if arabic else None,
         "english": english.get("text") if english else None,
@@ -145,9 +178,8 @@ def _to_arabic_numeral(n: int) -> str:
 
 
 def get_verse_of_the_day() -> dict:
-    """Deterministic pick from VERSE_OF_DAY_POOL based on day-of-year."""
-    import datetime as _dt
-
+    """Deterministic pick from VERSE_OF_DAY_POOL based on day-of-year, so
+    everyone sees the same verse on a given date."""
     idx = _dt.date.today().timetuple().tm_yday % len(VERSE_OF_DAY_POOL)
     surah_no, start_ayah, end_ayah, label = VERSE_OF_DAY_POOL[idx]
     verse = get_verse_range_multilang(surah_no, start_ayah, end_ayah)
@@ -160,46 +192,34 @@ def get_verse_of_the_day() -> dict:
         }
     )
     return verse
-def get_surah_full_multilang(surah_number: int, translation_edition: str):
+
+
+# ---------------------------------------------------------------------------
+# Search
+# ---------------------------------------------------------------------------
+@st.cache_data(ttl=60 * 60 * 6, show_spinner=False)
+def search_quran(keyword: str, edition: str = DEFAULT_TRANSLATION, surah: str = "all") -> list:
+    """Keyword search across the Quran translation text. Returns list of matches."""
+    if not keyword.strip():
+        return []
+    data = _get(f"{QURAN_API_BASE}/search/{keyword}/{surah}/{edition}")
+    if not data:
+        return []
+    return data.get("matches", [])
+
+
+# ---------------------------------------------------------------------------
+# Audio (CDN — no API call needed, just URL construction)
+# ---------------------------------------------------------------------------
+def get_ayah_audio_url(global_ayah_number: int, reciter: str = "ar.alafasy", bitrate: int = 128) -> str:
     """
-    Fetch a full surah in three editions at once (Arabic/Uthmani text,
-    the user's chosen translation, and transliteration), using Al Quran
-    Cloud's multi-edition endpoint:
-      GET /v1/surah/{surah}/editions/{ed1},{ed2},{ed3}
-
-    Returns a dict shaped like:
-        {
-            "meta": {...},                # surah-level info
-            "arabic": [ {...}, ... ],      # list of ayah dicts (Uthmani)
-            "translation": [ {...}, ... ], # list of ayah dicts (chosen translation)
-            "transliteration": [ {...}, ... ],
-        }
-    or {} on failure.
+    Direct CDN mp3 for a single ayah. global_ayah_number is the ayah's
+    position across the whole Quran (1-6236) — every ayah object returned
+    by the API includes this as `number`.
     """
-    editions = f"{ARABIC_EDITION},{translation_edition},{DEFAULT_TRANSLITERATION}"
-    url = f"{QURAN_API_BASE}/surah/{surah_number}/editions/{editions}"
-    try:
-        resp = requests.get(url, timeout=10)
-        resp.raise_for_status()
-        data = resp.json().get("data", [])
-        if len(data) < 3:
-            return {}
+    return f"{QURAN_CDN_BASE}/audio/{bitrate}/{reciter}/{global_ayah_number}.mp3"
 
-        arabic_ed, translation_ed, translit_ed = data[0], data[1], data[2]
 
-        meta = {
-            "name": arabic_ed.get("name"),
-            "englishName": arabic_ed.get("englishName"),
-            "englishNameTranslation": arabic_ed.get("englishNameTranslation"),
-            "revelationType": arabic_ed.get("revelationType"),
-            "numberOfAyahs": arabic_ed.get("numberOfAyahs", len(arabic_ed.get("ayahs", []))),
-        }
-
-        return {
-            "meta": meta,
-            "arabic": arabic_ed.get("ayahs", []),
-            "translation": translation_ed.get("ayahs", []),
-            "transliteration": translit_ed.get("ayahs", []),
-        }
-    except Exception:
-        return {}
+def get_surah_audio_url(surah_number: int, reciter: str = "ar.alafasy", bitrate: int = 128) -> str:
+    """Direct CDN mp3 for a full surah recitation."""
+    return f"{QURAN_CDN_BASE}/audio-surah/{bitrate}/{reciter}/{surah_number}.mp3"
