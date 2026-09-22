@@ -16,12 +16,14 @@ Emerald-green, curved-card UI to match the reference dashboard design.
 |---|---|---|
 | Dashboard with Verse of the Day | `app.py` | Rotates daily, deterministic |
 | Daily goals + streak + points | `app.py`, `database/db.py` | Local SQLite, no server needed |
-| Browse every surah, any translation | `pages/1_📖_Browse_Quran.py` | Arabic + English + Urdu |
-| 9 famous reciters, full surah + per-ayah audio | `pages/1_📖_Browse_Quran.py` | Streamed free from Al Quran Cloud CDN |
-| AI Companion chatbot (Quran + Hadith aware) | `pages/2_🤖_AI_Companion.py`, `services/ai_chat.py` | Grounded / cites sources |
-| Recitation Coach with live-style correction | `pages/3_🎙️_Recitation_Coach.py`, `services/recitation_coach.py` | Near-real-time, see honesty note below |
+| Sidebar Settings (reciter, translation, text size, transliteration) | `utils/helpers.py` → `render_sidebar_settings()` | One panel, used on every page, sticks as you navigate |
+| Browse every surah, any translation, ayah-range slider | `app_pages/1_📖_Browse_Quran.py` | Arabic + English + Urdu |
+| 9 famous reciters, full surah + per-ayah audio | `app_pages/1_📖_Browse_Quran.py` | Streamed free from Al Quran Cloud CDN |
+| AI Companion chatbot (Quran + Hadith aware) | `app_pages/2_🤖_AI_Companion.py`, `services/ai_chat.py` | Grounded / cites sources |
+| Recitation Coach — Practice Mode (accurate) | `app_pages/3_🎙️_Recitation_Coach.py`, `services/recitation_coach.py` | Record → transcribe → word-by-word score |
+| Recitation Coach — Live Mode (experimental) | same page, `build_live_mode_html()` | Continuous browser speech recognition, free, Chrome/Edge only — see honesty note below |
 | Urdu voice feedback | `services/tts.py` | Free gTTS |
-| Settings (reciter, translation, feedback voice) | `pages/4_⚙️_Settings.py` | Persisted in SQLite |
+| Settings (AI status, reset progress) | `app_pages/4_⚙️_Settings.py` | Persisted in SQLite |
 
 ---
 
@@ -44,7 +46,7 @@ quran-study-companion/
 │   ├── ai_chat.py                  # Claude API + grounding logic ("accuracy" layer)
 │   ├── tts.py                      # Free text-to-speech (gTTS)
 │   └── recitation_coach.py         # Local speech-to-text + word-diff scoring
-├── pages/                         # Every sidebar page after Home
+├── app_pages/                     # Every sidebar page after Home
 │   ├── 1_📖_Browse_Quran.py
 │   ├── 2_🤖_AI_Companion.py
 │   ├── 3_🎙️_Recitation_Coach.py
@@ -56,7 +58,7 @@ quran-study-companion/
 ```
 
 **Rule of thumb for adding new features:** if it talks to an external API, it
-goes in `services/`. If it's a new screen, it goes in `pages/`. If it's a
+goes in `services/`. If it's a new screen, it goes in `app_pages/`. If it's a
 constant (a new reciter, a new color), it goes in `config.py`.
 
 ---
@@ -86,27 +88,21 @@ pip install -r requirements.txt
 > First run of the Recitation Coach will download a small speech-recognition
 > model (a few hundred MB) automatically — that's normal and only happens once.
 
-### 5. Get a Claude API key (for the AI Companion)
-1. Go to https://console.anthropic.com and sign up.
-2. New accounts get some free trial credit — enough to build and demo this
-   project without spending anything up front.
-3. Create an API key under **Settings → API Keys**.
-4. Copy `.env.example` to `.env`:
-   ```bash
-   cp .env.example .env
-   ```
-5. Paste your key into `.env`:
-   ```
-   ANTHROPIC_API_KEY=sk-ant-...
-   ```
+### 5. Get an AI key (Gemini is free — default; Claude is paid, optional)
 
-**Want it 100% free with no card at all?** The AI Companion is written against
-the Claude API by default, but `services/ai_chat.py` only touches Claude in
-one place (`_get_client()` and the `client.messages.create(...)` call). You
-can swap in Google's **Gemini API** (generous free tier, no card required for
-the free tier) or **Groq** (free tier, very fast open models) by rewriting
-just that one function — everything else (the grounding/retrieval logic) stays
-the same.
+**Default: Gemini (free tier, no card needed)**
+1. Go to [aistudio.google.com](https://aistudio.google.com), sign in with a Google account.
+2. Click **Get API key → Create API key**.
+3. Copy `.env.example` to `.env` (`cp .env.example .env`) and paste it into `GEMINI_API_KEY`.
+
+That's it — `AI_PROVIDER=gemini` is already the default in `.env.example`.
+
+**Alternative: Claude (paid — needs credits)**
+If you'd rather use Claude, get a key at [console.anthropic.com](https://console.anthropic.com),
+add credits under Plans & Billing ($5 minimum — there's no permanent free
+API tier, only a small one-time trial credit on new accounts), paste the key
+into `ANTHROPIC_API_KEY` in `.env`, and set `AI_PROVIDER=anthropic`. You can
+flip back to Gemini any time by changing that one line — no code changes.
 
 ### 6. Run the app
 ```bash
@@ -114,6 +110,36 @@ streamlit run app.py
 ```
 It opens at `http://localhost:8501`. The sidebar shows Home, Browse Quran, AI
 Companion, Recitation Coach, and Settings — matching the reference layout.
+
+---
+
+## 🩹 Fixing `ModuleNotFoundError: No module named 'utils'` (or `config`, `services`, `database`)
+
+If you see this on Streamlit Cloud, it means the deployed copy of your repo
+is missing one of the shared folders (`utils/`, `services/`, `database/`,
+`assets/`) — almost always because a drag-and-drop upload through GitHub's
+web UI flattened the folder structure instead of preserving it (very common
+when uploading from a phone browser). Every page file in this project now
+also carries a defensive fix at the very top:
+```python
+import sys
+from pathlib import Path
+_ROOT = Path(__file__).resolve().parent.parent
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+```
+This guarantees the project root is importable regardless of how Streamlit
+resolves the page's working directory — but it can't fix a folder that
+genuinely isn't in your repo. **Check your repo on GitHub.com first:** open
+it in the browser and confirm you see `utils/`, `services/`, `database/`,
+and `assets/` as actual folders (clickable, with files inside), not just
+loose `.py` files sitting at the top level. If a folder is missing or flat,
+the most reliable fix with zero tools is to recreate it file-by-file using
+GitHub's **Add file → Create new file** button and **typing the full path
+with slashes as the filename** (e.g. type `utils/helpers.py` as the
+filename) — GitHub creates the folder automatically from the path, so this
+can't flatten no matter what browser or device you're on. Paste in the
+matching file's content from your unzipped project and commit.
 
 ---
 
@@ -125,10 +151,10 @@ Companion, Recitation Coach, and Settings — matching the reference layout.
 3. Click **New app**, pick your repo, branch `main`, main file `app.py`.
 4. Under **Advanced settings → Secrets**, paste:
    ```
-   ANTHROPIC_API_KEY = "sk-ant-..."
+   GEMINI_API_KEY = "your-gemini-key"
    ```
-   (Streamlit Cloud secrets are read the same way as environment variables —
-   `config.py` already uses `os.getenv`, so no code changes needed.)
+   (or, if using Claude instead: `AI_PROVIDER = "anthropic"` and `ANTHROPIC_API_KEY = "sk-ant-..."`)
+   Add `DEEPGRAM_API_KEY = "..."` too if you set up Live Call Mode.
 5. Click **Deploy**. You'll get a public `https://<something>.streamlit.app` link.
 
 > Note: the free tier has limited CPU/RAM. If the Recitation Coach feels slow
@@ -175,30 +201,74 @@ anything important against a trusted source or scholar.
 
 ---
 
-## 🎙️ Recitation Coach — honest scope
+## 🎙️ Recitation Coach — two modes, and the honest trade-off between them
 
-A true "live phone call" AI tutor that corrects you word-by-word *while you're
-still speaking* needs a **streaming** speech recognizer (partial results every
-~200ms). Free, fully local models don't do that reliably for Arabic/tajweed
-yet, so this project uses a **near-real-time loop** instead:
+**Practice Mode** (the reliable one): you record a short clip (`st.audio_input`
+— built into Streamlit, no extra setup), `faster-whisper` (free, runs locally
+on CPU) transcribes it, and `services/recitation_coach.py` diffs your
+transcript against the correct ayah word-by-word (`difflib`), after
+normalizing Arabic text (stripping diacritics, unifying alef/ya/ta-marbuta
+variants) so it flags real mistakes without being overly strict about minor
+tajweed marks. You get colour-coded feedback + a spoken tip (`gTTS`) in
+1–3 seconds. This is chunk-based, not continuous — but tested and accurate.
 
-1. You record a short clip (`st.audio_input` — built into Streamlit, no extra
-   setup) reciting one ayah.
-2. `faster-whisper` (free, runs locally on CPU) transcribes it.
-3. `services/recitation_coach.py` diffs your transcript against the correct
-   ayah word-by-word (`difflib`) and normalizes Arabic text first (strips
-   diacritics, unifies alef/ya/ta-marbuta variants) so it flags real mistakes
-   without being overly strict about minor tajweed marks.
-4. You get colour-coded feedback + a spoken tip (via `gTTS`) in 1–3 seconds.
+**Live Mode (beta)** — the closer-to-a-real-live-call attempt: it uses the
+browser's own **free, built-in Web Speech API** (`build_live_mode_html()` in
+`services/recitation_coach.py`, rendered via `st.components.v1.html`) to
+listen continuously and light up reference words green/red *as you recite*,
+with no per-chunk round trip. Two things to know before you rely on it:
+- **Browser support:** Chrome or Edge only (desktop or Android) — no Safari,
+  no Firefox. The component detects unsupported browsers and says so rather
+  than silently doing nothing.
+- **Recognition quality:** it uses the browser's general-purpose Arabic
+  speech model, not one trained on tajweed-precise Quranic recitation, and
+  the word-matching is a simple greedy left-to-right pass (no backtracking)
+  — so it's a good "am I roughly flowing correctly, live" signal, not a
+  tajweed-grade judge. Practice Mode is the more precise, fully-tested
+  option; think of Live Mode as the live/continuous bonus layer on top.
 
-### Going further (if you want to push past the MVP)
-- **True streaming correction:** replace the record→transcribe→diff loop with
-  a streaming ASR service (e.g. a cloud provider's streaming speech-to-text)
-  fed through `streamlit-webrtc`, so feedback appears while you're still
-  talking. This is the biggest engineering step up and typically isn't free.
+## 📞 Live Call Mode — the "at any cost" paid option
+
+If free isn't the constraint, `services/live_stream_coach.py` gives you the
+real thing: continuous WebRTC mic streaming (`streamlit-webrtc`) piped live
+to **Deepgram**'s streaming transcription — works in every browser (not just
+Chrome), far more stable and accurate than the free Web Speech API. Get a
+free-trial key at console.deepgram.com (a few dollars of paid usage after
+that covers a lot of practice), add `DEEPGRAM_API_KEY` to your `.env` /
+Secrets, `pip install streamlit-webrtc deepgram-sdk streamlit-autorefresh av
+numpy`, and the "📞 Live Call Mode" section on Recitation Coach lights up.
+
+**What paying does *not* buy:** a model that judges tajweed (makhraj, madd
+length, qalqalah) the way a human teacher does. No service — free or paid —
+does that off-the-shelf; it needs a custom model trained on
+tajweed-annotated audio. Every option in this app, including this one, gives
+you accurate live *word matching*, not a tajweed examiner.
+
+**One honesty note:** this file wires together WebRTC threading, a
+persistent websocket, and a polling UI refresh — three moving parts I
+followed the documented pattern for but couldn't run end-to-end in a real
+browser to verify from here. Test it locally before relying on it; Practice
+Mode and the free Live Mode are the tested fallbacks if anything breaks.
+
+There's also a real technical ceiling worth knowing about: `st.components.v1.html`
+renders your component inside a sandboxed iframe, and microphone access
+(`getUserMedia`, which `SpeechRecognition` needs) requires that iframe to be
+granted a `microphone` permissions policy. Whether Streamlit's iframe grants
+that can vary by Streamlit version/browser — if Live Mode's Start button
+does nothing or the browser never prompts for mic access, that's why. If you
+want to push past this ceiling:
+
+- **Fix the iframe permission properly:** package this as a real Streamlit
+  custom component (`streamlit.components.v1.declare_component`) instead of
+  raw `components.v1.html` — custom components get more control over their
+  iframe's permissions policy.
+- **True streaming ASR, cloud-grade:** replace the Web Speech API with a
+  paid streaming speech-to-text service (e.g. a cloud provider's streaming
+  STT) fed through `streamlit-webrtc` — the biggest step up, and typically
+  not free.
 - **Real tajweed rule-checking** (madd length, qalqalah, idgham, etc.), not
-  just "right/wrong word" — this needs a phoneme-level model trained on
-  tajweed-annotated Qur'an audio (research-level; e.g. look at Tarteel.ai's
+  just "right/wrong word" — needs a phoneme-level model trained on
+  tajweed-annotated Qur'an audio (research-level; look at Tarteel.ai's
   public work for inspiration).
 - **Per-user accounts** instead of one shared local SQLite file, if you want
   multiple people to have separate streaks — swap `database/db.py` for a
@@ -237,7 +307,7 @@ in anything you submit.
   `HADITH_COLLECTIONS` in `config.py`.
 - **Change the color theme:** everything is in `assets/style.css` and the
   `THEME` dict in `config.py`.
-- **Add a new page:** drop a new file in `pages/`, prefixed with a number so
+- **Add a new page:** drop a new file in `app_pages/`, prefixed with a number so
   it sits in the right sidebar order (e.g. `5_📊_Progress.py`).
 
 ---
