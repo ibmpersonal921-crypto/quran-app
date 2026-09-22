@@ -13,7 +13,6 @@ from utils.helpers import inject_css, page_header, render_sidebar_branding, rend
 from database import db
 from services import quran_api, recitation_coach, tts
 
-st.set_page_config(page_title=f"{APP_NAME} — Recitation Coach", page_icon="🎙️", layout="wide")
 db.init_db()
 inject_css()
 
