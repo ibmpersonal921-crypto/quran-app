@@ -160,3 +160,46 @@ def get_verse_of_the_day() -> dict:
         }
     )
     return verse
+def get_surah_full_multilang(surah_number: int, translation_edition: str):
+    """
+    Fetch a full surah in three editions at once (Arabic/Uthmani text,
+    the user's chosen translation, and transliteration), using Al Quran
+    Cloud's multi-edition endpoint:
+      GET /v1/surah/{surah}/editions/{ed1},{ed2},{ed3}
+
+    Returns a dict shaped like:
+        {
+            "meta": {...},                # surah-level info
+            "arabic": [ {...}, ... ],      # list of ayah dicts (Uthmani)
+            "translation": [ {...}, ... ], # list of ayah dicts (chosen translation)
+            "transliteration": [ {...}, ... ],
+        }
+    or {} on failure.
+    """
+    editions = f"{ARABIC_EDITION},{translation_edition},{DEFAULT_TRANSLITERATION}"
+    url = f"{QURAN_API_BASE}/surah/{surah_number}/editions/{editions}"
+    try:
+        resp = requests.get(url, timeout=10)
+        resp.raise_for_status()
+        data = resp.json().get("data", [])
+        if len(data) < 3:
+            return {}
+
+        arabic_ed, translation_ed, translit_ed = data[0], data[1], data[2]
+
+        meta = {
+            "name": arabic_ed.get("name"),
+            "englishName": arabic_ed.get("englishName"),
+            "englishNameTranslation": arabic_ed.get("englishNameTranslation"),
+            "revelationType": arabic_ed.get("revelationType"),
+            "numberOfAyahs": arabic_ed.get("numberOfAyahs", len(arabic_ed.get("ayahs", []))),
+        }
+
+        return {
+            "meta": meta,
+            "arabic": arabic_ed.get("ayahs", []),
+            "translation": translation_ed.get("ayahs", []),
+            "transliteration": translit_ed.get("ayahs", []),
+        }
+    except Exception:
+        return {}
