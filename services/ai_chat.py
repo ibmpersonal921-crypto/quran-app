@@ -206,7 +206,14 @@ def _ask_gemini(system: str, user_query: str, chat_history: list) -> dict:
                 max_output_tokens=CHAT_MAX_TOKENS,
             ),
         )
-        return {"answer": response.text or "", "grounded": None, "context_used": ""}
+        text = response.text or ""
+        try:
+            finish_reason = response.candidates[0].finish_reason
+            if str(finish_reason).upper().endswith("MAX_TOKENS"):
+                text += "\n\n*(Response was cut off at the length limit — ask \"continue\" and I'll pick up where I left off.)*"
+        except Exception:
+            pass
+        return {"answer": text, "grounded": None, "context_used": ""}
     except Exception as e:  # noqa: BLE001
         return {
             "answer": f"⚠️ The AI Companion couldn't reach Gemini: `{e}`",
@@ -237,6 +244,8 @@ def _ask_anthropic(system: str, user_query: str, chat_history: list) -> dict:
             messages=messages,
         )
         text = "".join(block.text for block in response.content if block.type == "text")
+        if response.stop_reason == "max_tokens":
+            text += "\n\n*(Response was cut off at the length limit — ask \"continue\" and I'll pick up where I left off.)*"
         return {"answer": text, "grounded": None, "context_used": ""}
     except Exception as e:  # noqa: BLE001
         return {
