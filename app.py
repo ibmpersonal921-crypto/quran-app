@@ -1,11 +1,9 @@
 """
 app.py
 ------
-Entry point for the Streamlit app. Sets page config once, then hands off
-to st.navigation() with explicit titles/icons for every page — this is
-what gives the sidebar clean labels ("Home", "Browse Quran", ...) instead
-of Streamlit's default behavior of showing the raw filename ("app") for
-the main script.
+Entry point for the Streamlit multipage app. This file ONLY sets up
+navigation — the actual Home/Dashboard content lives in
+app_pages/0_🏠_Home.py, just like every other page.
 
 Run with:  streamlit run app.py
 """
@@ -19,12 +17,8 @@ if str(_ROOT) not in sys.path:
 
 import streamlit as st
 
-from config import APP_NAME, APP_ICON, APP_TAGLINE
-from database import db
-
-st.set_page_config(page_title=f"{APP_NAME} — Dashboard", page_icon=APP_ICON, layout="wide")
-db.init_db()
-
+# IMPORTANT: these paths must exactly match the filenames inside
+# app_pages/ (case-sensitive, emoji included, no trailing spaces).
 pages = [
     st.Page("app_pages/0_🏠_Home.py", title="Home", icon="🏠", default=True),
     st.Page("app_pages/1_📖_Browse_Quran.py", title="Browse Quran", icon="📖"),
@@ -33,5 +27,5 @@ pages = [
     st.Page("app_pages/4_⚙️_Settings.py", title="Settings", icon="⚙️"),
 ]
 
-pg = st.navigation(pages, position="sidebar")
-pg.run()
+nav = st.navigation(pages)
+nav.run()
