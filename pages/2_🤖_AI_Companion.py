@@ -1,26 +1,27 @@
+import sys
+from pathlib import Path
+
+_ROOT = Path(__file__).resolve().parent.parent
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
 import streamlit as st
 
 from config import APP_NAME
-from utils.helpers import inject_css, page_header
+from utils.helpers import inject_css, page_header, render_sidebar_branding, render_sidebar_settings
 from database import db
 from services import ai_chat
 
-st.set_page_config(page_title=f"{APP_NAME} — AI Companion", page_icon="🤖", layout="wide")
 db.init_db()
 inject_css()
 
+with st.sidebar:
+    render_sidebar_branding()
+render_sidebar_settings()
+
 page_header("AI Companion", "Ask about a verse, a hadith, or a topic — grounded in real sources.", "🤖")
 
-st.markdown(
-    """
-    <div class="qsc-card qsc-card-tight" style="border-color:rgba(212,175,55,0.35);">
-    ℹ️ I fetch the actual Arabic text of any ayah or hadith you reference before answering,
-    so quotes are accurate. For fiqh rulings I present the mainstream scholarly views rather
-    than a single verdict — for a binding personal ruling, please consult a qualified scholar.
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
+st.caption("Answers come from a language model and can be wrong. Verify anything you act on against a published tafsir or a qualified scholar.")
 
 if "chat_messages" not in st.session_state:
     st.session_state.chat_messages = [
@@ -28,34 +29,35 @@ if "chat_messages" not in st.session_state:
     ]
 
 for msg in st.session_state.chat_messages:
-    with st.chat_message(msg["role"], avatar="🤖" if msg["role"] == "assistant" else "🧕"):
+    avatar = "🧠" if msg["role"] == "assistant" else "🙂"
+    with st.chat_message(msg["role"], avatar=avatar):
         st.markdown(msg["content"])
 
 prefill = st.session_state.pop("prefill_chat_question", None)
-user_input = st.chat_input("Ask me anything about the Quran or Hadith...")
+user_input = st.chat_input("Ask about a verse, a word, or its context")
 if prefill and not user_input:
     user_input = prefill
 
 if user_input:
     st.session_state.chat_messages.append({"role": "user", "content": user_input})
     db.log_chat("user", user_input)
-    with st.chat_message("user", avatar="🧕"):
+    with st.chat_message("user", avatar="🙂"):
         st.markdown(user_input)
 
-    with st.chat_message("assistant", avatar="🤖"):
+    with st.chat_message("assistant", avatar="🧠"):
         with st.spinner("Checking sources..."):
             result = ai_chat.ask(user_input, st.session_state.chat_messages[:-1])
         st.markdown(result["answer"])
         if result["grounded"]:
             st.caption("✅ Grounded in verified Quran/Hadith text fetched live for this answer.")
-        with st.expander("Clear this chat"):
-            if st.button("🗑️ Clear conversation"):
-                st.session_state.chat_messages = []
-                db.clear_chat_history()
-                st.rerun()
 
     st.session_state.chat_messages.append({"role": "assistant", "content": result["answer"]})
     db.log_chat("assistant", result["answer"], sources=result.get("context_used", ""))
+
+if st.button("Clear conversation"):
+    st.session_state.chat_messages = []
+    db.clear_chat_history()
+    st.rerun()
 
 st.markdown('<div class="qsc-card qsc-card-tight">', unsafe_allow_html=True)
 st.markdown('<span class="qsc-label">Try asking</span>', unsafe_allow_html=True)
