@@ -65,12 +65,20 @@ h1, h2, h3, h4 { color: var(--text) !important; font-weight: 600; letter-spacing
 
 /* ---------- Curved "card" containers ---------- */
 .qsc-card{
+  position: relative;
   background: linear-gradient(160deg, var(--surface) 0%, var(--surface-soft) 100%);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 28px 30px;
   margin-bottom: 20px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.03);
+  overflow: hidden;
+}
+.qsc-card::before{
+  content:"";
+  position:absolute; top:0; left:0; right:0; height:3px;
+  background: linear-gradient(90deg, var(--gold), transparent 60%);
+  opacity:0.8;
 }
 .qsc-card-tight{
   padding: 18px 20px;
@@ -111,14 +119,30 @@ h1, h2, h3, h4 { color: var(--text) !important; font-weight: 600; letter-spacing
 
 /* Streak / stat pills */
 .qsc-stat{
-  background: var(--surface-soft);
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(160deg, var(--surface-soft) 0%, var(--surface) 100%);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 16px 18px;
+  padding: 20px 18px 18px;
   text-align:center;
+  box-shadow: 0 10px 26px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.03);
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 }
-.qsc-stat .value{ font-size:1.6rem; font-weight:700; color: var(--green); }
-.qsc-stat .label{ font-size:0.78rem; color: var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; }
+.qsc-stat::before{
+  content:"";
+  position:absolute; top:-40%; right:-30%;
+  width:120px; height:120px; border-radius:50%;
+  background: radial-gradient(circle, rgba(212,175,55,0.16) 0%, transparent 70%);
+  pointer-events:none;
+}
+.qsc-stat:hover{
+  transform: translateY(-3px);
+  border-color: rgba(212,175,55,0.4);
+  box-shadow: 0 14px 32px rgba(0,0,0,0.4);
+}
+.qsc-stat .value{ font-size:1.85rem; font-weight:700; color: var(--green); letter-spacing:-0.01em; }
+.qsc-stat .label{ margin-top:4px; font-size:0.78rem; color: var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; }
 
 /* Buttons */
 .stButton>button, .stDownloadButton>button{
@@ -168,6 +192,36 @@ h1, h2, h3, h4 { color: var(--text) !important; font-weight: 600; letter-spacing
 
 /* Verse-of-the-day surah tag top right, like the reference dashboard */
 .qsc-vod-tag{ color: var(--gold); font-weight:600; }
+
+/* Numbered circular ayah badge (Browse Quran / Recitation Coach) */
+.qsc-ayah-badge{
+  display:flex; align-items:center; justify-content:center;
+  width:34px; height:34px; border-radius:50%;
+  background: var(--surface-soft);
+  border: 1px solid rgba(212,175,55,0.4);
+  color: var(--gold);
+  font-weight:600; font-size:0.85rem;
+  margin-top: 6px;
+}
+
+/* Quick-link tiles on the dashboard */
+.qsc-card-tight{
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+.qsc-card-tight:hover{
+  transform: translateY(-2px);
+  border-color: rgba(212,175,55,0.4);
+}
+
+/* App header: bigger emoji badge with a soft glow, like a real app icon */
+.qsc-header .emoji{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:48px; height:48px; border-radius:14px;
+  background: radial-gradient(circle at 30% 20%, rgba(212,175,55,0.22), rgba(212,175,55,0.04));
+  border: 1px solid var(--border);
+  font-size:1.7rem;
+}
+.qsc-header h1{ font-size:1.8rem; }
 
 /* subtle scrollbar */
 ::-webkit-scrollbar{ width:8px; height:8px; }
