@@ -11,7 +11,6 @@ from config import APP_NAME, AI_PROVIDER, GEMINI_API_KEY, ANTHROPIC_API_KEY
 from utils.helpers import inject_css, page_header, render_sidebar_branding, render_sidebar_settings
 from database import db
 
-st.set_page_config(page_title=f"{APP_NAME} — Settings", page_icon="⚙️", layout="wide")
 db.init_db()
 inject_css()
 
