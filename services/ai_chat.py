@@ -30,7 +30,15 @@ import re
 
 import streamlit as st
 
-from config import ANTHROPIC_API_KEY, CHAT_MODEL, CHAT_MAX_TOKENS, HADITH_COLLECTIONS
+from config import (
+    AI_PROVIDER,
+    GEMINI_API_KEY,
+    GEMINI_MODEL,
+    ANTHROPIC_API_KEY,
+    CHAT_MODEL,
+    CHAT_MAX_TOKENS,
+    HADITH_COLLECTIONS,
+)
 from services import quran_api, hadith_api
 
 SYSTEM_PROMPT = """You are the AI Companion inside "Quran Study Companion", a study app.
@@ -152,7 +160,7 @@ def _build_context(user_query: str) -> str:
 
 
 @st.cache_resource(show_spinner=False)
-def _get_client():
+def _get_anthropic_client():
     import anthropic
 
     if not ANTHROPIC_API_KEY:
@@ -160,30 +168,67 @@ def _get_client():
     return anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
 
-def ask(user_query: str, chat_history: list) -> dict:
-    """
-    chat_history: list of {"role": "user"|"assistant", "content": str}
-    Returns {"answer": str, "grounded": bool, "context_used": str}
-    """
-    client = _get_client()
+@st.cache_resource(show_spinner=False)
+def _get_gemini_client():
+    from google import genai
+
+    if not GEMINI_API_KEY:
+        return None
+    return genai.Client(api_key=GEMINI_API_KEY)
+
+
+def _ask_gemini(system: str, user_query: str, chat_history: list) -> dict:
+    from google.genai import types
+
+    client = _get_gemini_client()
     if client is None:
         return {
             "answer": (
-                "⚠️ No Claude API key is configured yet. Add `ANTHROPIC_API_KEY` to your "
-                "`.env` file (see README) to enable the AI Companion."
+                "No Gemini API key found. Get a free one (no card needed) at "
+                "aistudio.google.com, then set `GEMINI_API_KEY` in your environment "
+                "or Streamlit Cloud Secrets, then ask again."
             ),
             "grounded": False,
             "context_used": "",
         }
+    # Gemini uses "model" instead of "assistant" for the AI's turns.
+    contents = [
+        {"role": ("model" if m["role"] == "assistant" else "user"), "parts": [{"text": m["content"]}]}
+        for m in chat_history
+    ]
+    contents.append({"role": "user", "parts": [{"text": user_query}]})
+    try:
+        response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=contents,
+            config=types.GenerateContentConfig(
+                system_instruction=system,
+                max_output_tokens=CHAT_MAX_TOKENS,
+            ),
+        )
+        return {"answer": response.text or "", "grounded": None, "context_used": ""}
+    except Exception as e:  # noqa: BLE001
+        return {
+            "answer": f"⚠️ The AI Companion couldn't reach Gemini: `{e}`",
+            "grounded": False,
+            "context_used": "",
+        }
 
-    context = _build_context(user_query)
-    system = SYSTEM_PROMPT
-    if context:
-        system += f"\n\n{context}"
 
+def _ask_anthropic(system: str, user_query: str, chat_history: list) -> dict:
+    client = _get_anthropic_client()
+    if client is None:
+        return {
+            "answer": (
+                "No API key found. Set `ANTHROPIC_API_KEY` in your environment "
+                "(local `.env`) or in `.streamlit/secrets.toml` / your Streamlit Cloud "
+                "app's Secrets panel, then ask again."
+            ),
+            "grounded": False,
+            "context_used": "",
+        }
     messages = [{"role": m["role"], "content": m["content"]} for m in chat_history]
     messages.append({"role": "user", "content": user_query})
-
     try:
         response = client.messages.create(
             model=CHAT_MODEL,
@@ -192,10 +237,33 @@ def ask(user_query: str, chat_history: list) -> dict:
             messages=messages,
         )
         text = "".join(block.text for block in response.content if block.type == "text")
-        return {"answer": text, "grounded": bool(context), "context_used": context}
-    except Exception as e:  # noqa: BLE001 — surface any API error to the UI, don't crash
+        return {"answer": text, "grounded": None, "context_used": ""}
+    except Exception as e:  # noqa: BLE001
         return {
             "answer": f"⚠️ The AI Companion couldn't reach Claude: `{e}`",
             "grounded": False,
             "context_used": "",
         }
+
+
+def ask(user_query: str, chat_history: list) -> dict:
+    """
+    chat_history: list of {"role": "user"|"assistant", "content": str}
+    Returns {"answer": str, "grounded": bool, "context_used": str}
+    Routes to Gemini (default, free) or Claude (if AI_PROVIDER=anthropic and
+    you've added credits) — same grounding logic either way.
+    """
+    context = _build_context(user_query)
+    system = SYSTEM_PROMPT
+    if context:
+        system += f"\n\n{context}"
+
+    if AI_PROVIDER == "anthropic":
+        result = _ask_anthropic(system, user_query, chat_history)
+    else:
+        result = _ask_gemini(system, user_query, chat_history)
+
+    if result["grounded"] is None:
+        result["grounded"] = bool(context)
+        result["context_used"] = context
+    return result
