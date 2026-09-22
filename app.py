@@ -3,7 +3,7 @@ app.py
 ------
 Entry point for the Streamlit multipage app. This file ONLY sets up
 navigation — the actual Home/Dashboard content lives in
-app_pages/0_Home.py, just like every other page.
+pages/0_Home.py, just like every other page.
 
 NOTE: page filenames are plain ASCII on purpose (no emoji) because
 emoji in filenames get corrupted/mismatched when pushed through
@@ -22,11 +22,11 @@ if str(_ROOT) not in sys.path:
 import streamlit as st
 
 pages = [
-    st.Page("app_pages/0_Home.py", title="Home", icon="🏠", default=True),
-    st.Page("app_pages/1_Browse_Quran.py", title="Browse Quran", icon="📖"),
-    st.Page("app_pages/2_AI_Companion.py", title="AI Companion", icon="🤖"),
-    st.Page("app_pages/3_Recitation_Coach.py", title="Recitation Coach", icon="🎙️"),
-    st.Page("app_pages/4_Settings.py", title="Settings", icon="⚙️"),
+    st.Page("pages/0_Home.py", title="Home", icon="🏠", default=True),
+    st.Page("pages/1_Browse_Quran.py", title="Browse Quran", icon="📖"),
+    st.Page("pages/2_AI_Companion.py", title="AI Companion", icon="🤖"),
+    st.Page("pages/3_Recitation_Coach.py", title="Recitation Coach", icon="🎙️"),
+    st.Page("pages/4_Settings.py", title="Settings", icon="⚙️"),
 ]
 
 nav = st.navigation(pages)
