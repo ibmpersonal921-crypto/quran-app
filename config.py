@@ -133,7 +133,7 @@ ANTHROPIC_API_KEY = _resolve_key("ANTHROPIC_API_KEY")
 # Haiku 4.5 is the cheapest current Claude model — only used if
 # AI_PROVIDER=anthropic and you've added credits.
 CHAT_MODEL = os.getenv("CLAUDE_MODEL", "claude-haiku-4-5-20251001")
-CHAT_MAX_TOKENS = 1000
+CHAT_MAX_TOKENS = 2048
 
 # ---------------------------------------------------------------------------
 # Recitation coach
