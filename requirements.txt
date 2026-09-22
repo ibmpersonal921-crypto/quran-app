@@ -1,9 +1,12 @@
 # Core app
-streamlit>=1.38.0
+# streamlit>=1.40.0 because st.audio_input (used by Recitation Coach) only
+# became generally available in 1.40 — an older pin could 404 on that widget.
+streamlit>=1.40.0
 requests>=2.31.0
 python-dotenv>=1.0.1
 
-# AI Companion (Claude API)
+# AI Companion — Gemini (free tier, default) or Claude (paid, optional)
+google-genai>=1.0.0
 anthropic>=0.34.0
 
 # Text-to-speech (free, needs internet — Arabic/Urdu/English voices)
@@ -11,3 +14,12 @@ gTTS>=2.5.1
 
 # Recitation Coach: local, free speech-to-text
 faster-whisper>=1.0.3
+SpeechRecognition>=3.10.4
+
+# Live Call Mode (optional, paid) — true continuous streaming correction.
+# Only needed if you set DEEPGRAM_API_KEY; the rest of the app works without these.
+streamlit-webrtc>=0.47.0
+deepgram-sdk>=3.5.0
+streamlit-autorefresh>=1.0.1
+numpy>=1.26.0
+av>=11.0.0
