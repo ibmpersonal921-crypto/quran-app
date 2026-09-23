@@ -1,881 +1,360 @@
+/* ============================================================================
+   Quran Study Companion — refined dark dashboard
+   Safe drop-in theme for the existing Streamlit class names.
+   Focus: clean, quiet, premium. No layout hacks, no aggressive global styling.
+   ============================================================================ */
 
-/* ==========================================================================
-   QURAN STUDY COMPANION — PREMIUM OBSIDIAN / EMERALD THEME
-   Drop-in replacement for: assets/style.css
-
-   Built for the existing Streamlit app/classes:
-   .qsc-header .qsc-divider .qsc-stat .qsc-card .qsc-card-header
-   .qsc-label .qsc-vod-tag .qsc-tag .arabic-text .urdu-text
-   ========================================================================== */
-
-@import url("https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600;700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --qsc-bg: #0B0F12;
-  --qsc-bg-2: #0A1512;
-  --qsc-emerald: #0A231C;
-  --qsc-emerald-2: #10382B;
-  --qsc-gold: #D4AF37;
-  --qsc-amber: #F59E0B;
-  --qsc-text: #F5F7F6;
-  --qsc-text-2: #B8C6C0;
-  --qsc-muted: #71827B;
-  --qsc-line: rgba(255,255,255,.08);
-  --qsc-line-strong: rgba(212,175,55,.20);
-  --qsc-glass: rgba(14,20,23,.72);
-  --qsc-glass-2: rgba(7,22,17,.72);
-  --qsc-radius-xl: 24px;
-  --qsc-radius-lg: 18px;
-  --qsc-radius-md: 14px;
-  --qsc-shadow: 0 22px 70px rgba(0,0,0,.34);
+  --qsc-bg: #0b0f12;
+  --qsc-side: #071a13;
+  --qsc-side-2: #0a231c;
+  --qsc-card: rgba(15, 23, 26, 0.78);
+  --qsc-card-2: rgba(10, 24, 19, 0.78);
+  --qsc-border: rgba(255,255,255,.085);
+  --qsc-border-gold: rgba(212,175,55,.18);
+  --qsc-text: #f4f7f5;
+  --qsc-sub: #b9c9c0;
+  --qsc-muted: #7e9186;
+  --qsc-gold: #d4af37;
+  --qsc-amber: #f59e0b;
+  --qsc-green: #2ecc71;
+  --qsc-radius: 18px;
+  --qsc-radius-sm: 12px;
   --qsc-ease: cubic-bezier(.4,0,.2,1);
 }
 
-/* ---------- Base ---------- */
+/* App background — intentionally simple so Streamlit pages keep their layout. */
+html, body, [data-testid='stAppViewContainer'] {
+  background: var(--qsc-bg) !important;
+}
 
-html, body, [data-testid="stAppViewContainer"] {
+[data-testid='stAppViewContainer'] > .main {
   background:
-    radial-gradient(circle at 78% 5%, rgba(30,89,68,.13), transparent 30%),
-    radial-gradient(circle at 6% 92%, rgba(212,175,55,.045), transparent 28%),
+    radial-gradient(700px 350px at 75% 0%, rgba(20,65,49,.10), transparent 70%),
     var(--qsc-bg) !important;
 }
 
-[data-testid="stAppViewContainer"] {
-  color: var(--qsc-text) !important;
-}
-
 .main .block-container {
-  max-width: 1380px !important;
-  padding: 2.2rem 3rem 4rem !important;
-}
-
-* {
-  box-sizing: border-box;
+  max-width: 1220px;
+  padding-top: 2rem;
+  padding-bottom: 3rem;
 }
 
 body, button, input, textarea, select {
-  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
 }
 
-::selection {
-  background: rgba(212,175,55,.22);
-  color: #fff;
-}
-
-/* Hide Streamlit chrome that makes the app feel like a prototype. */
 #MainMenu { visibility: hidden; }
 footer { visibility: hidden; }
-[data-testid="stDecoration"] { display: none; }
-[data-testid="stToolbar"] { display: none; }
 
-/* ---------- Sidebar ---------- */
-
-section[data-testid="stSidebar"] {
-  width: 300px !important;
-  min-width: 300px !important;
+/* --------------------------------------------------------------------------
+   Sidebar
+   -------------------------------------------------------------------------- */
+section[data-testid='stSidebar'] {
   background:
-    radial-gradient(circle at 10% 0%, rgba(37,116,83,.15), transparent 35%),
-    linear-gradient(180deg, #071813 0%, #07130F 58%, #06100C 100%) !important;
+    linear-gradient(180deg, #06150f 0%, #071a13 55%, #06140f 100%) !important;
   border-right: 1px solid rgba(255,255,255,.055);
-  box-shadow: 18px 0 50px rgba(0,0,0,.20);
 }
 
-section[data-testid="stSidebar"] > div {
-  padding: 1.25rem .95rem !important;
+section[data-testid='stSidebar'] > div {
+  padding-top: 1rem;
 }
 
-section[data-testid="stSidebar"] .block-container {
-  padding: 0 !important;
-}
-
-/* Sidebar branding */
-section[data-testid="stSidebar"] .qsc-brand {
-  padding: .35rem .55rem 1.1rem;
-}
-
-section[data-testid="stSidebar"] .qsc-brand-mark {
-  width: 42px;
-  height: 42px;
-  display: grid;
-  place-items: center;
-  border-radius: 13px;
-  color: var(--qsc-gold);
-  background:
-    radial-gradient(circle at 50% 35%, rgba(212,175,55,.20), transparent 58%),
-    rgba(255,255,255,.035);
-  border: 1px solid rgba(212,175,55,.18);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.07),
-    0 0 0 1px rgba(255,255,255,.015),
-    0 10px 28px rgba(0,0,0,.30);
-}
-
-section[data-testid="stSidebar"] .qsc-brand-name {
-  color: var(--qsc-text);
-  font-size: .98rem;
-  font-weight: 700;
-  letter-spacing: -.02em;
-}
-
-section[data-testid="stSidebar"] .qsc-brand-subtitle {
-  color: var(--qsc-muted);
-  font-size: .73rem;
-  margin-top: .16rem;
-  letter-spacing: .02em;
-}
-
-section[data-testid="stSidebar"] hr,
+section[data-testid='stSidebar'] hr,
 .qsc-divider {
   border: 0 !important;
-  border-top: 1px solid rgba(255,255,255,.075) !important;
-  margin: .9rem 0 1rem !important;
-  opacity: 1 !important;
+  border-top: 1px solid rgba(255,255,255,.08) !important;
+  margin: 1rem 0 !important;
 }
 
-/* Streamlit multipage navigation */
-section[data-testid="stSidebar"] [data-testid="stSidebarNav"] {
-  padding-top: .25rem !important;
+section[data-testid='stSidebar'] [data-testid='stSidebarNav'] {
+  padding-top: .2rem;
 }
 
-section[data-testid="stSidebar"] [data-testid="stSidebarNav"] ul {
-  gap: 5px !important;
-}
-
-section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li {
-  width: 100% !important;
-}
-
-section[data-testid="stSidebar"] [data-testid="stSidebarNav"] a {
-  position: relative;
-  min-height: 44px !important;
-  padding: .62rem .78rem !important;
-  border-radius: 12px !important;
-  color: #A8B7B0 !important;
-  background: transparent !important;
+section[data-testid='stSidebar'] [data-testid='stSidebarNav'] a {
+  border-radius: 11px !important;
   border: 1px solid transparent !important;
-  transition:
-    background .26s var(--qsc-ease),
-    border-color .26s var(--qsc-ease),
-    color .26s var(--qsc-ease),
-    transform .26s var(--qsc-ease),
-    box-shadow .26s var(--qsc-ease) !important;
+  color: #b4c2bc !important;
+  margin: 2px 0 !important;
+  transition: background .22s var(--qsc-ease), color .22s var(--qsc-ease), border-color .22s var(--qsc-ease) !important;
 }
 
-section[data-testid="stSidebar"] [data-testid="stSidebarNav"] a:hover {
-  color: var(--qsc-text) !important;
+section[data-testid='stSidebar'] [data-testid='stSidebarNav'] a:hover {
+  color: #f4f7f5 !important;
   background: rgba(255,255,255,.035) !important;
-  border-color: rgba(255,255,255,.055) !important;
-  transform: translateX(2px);
 }
 
-section[data-testid="stSidebar"] [data-testid="stSidebarNav"] a[aria-current="page"] {
-  color: #EAF5F0 !important;
-  background:
-    linear-gradient(90deg, rgba(15,62,45,.82), rgba(10,35,28,.58)) !important;
-  border-color: rgba(74,155,118,.12) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.035),
-    0 10px 28px rgba(0,0,0,.18),
-    0 0 24px rgba(30,118,85,.08) !important;
+section[data-testid='stSidebar'] [data-testid='stSidebarNav'] a[aria-current='page'] {
+  color: #edf7f2 !important;
+  background: linear-gradient(90deg, rgba(18,60,43,.85), rgba(10,35,28,.62)) !important;
+  border-color: rgba(63,132,100,.16) !important;
+  box-shadow: inset 3px 0 0 var(--qsc-gold);
 }
 
-section[data-testid="stSidebar"] [data-testid="stSidebarNav"] a[aria-current="page"]::before {
-  content: "";
-  position: absolute;
-  left: -1px;
-  top: 8px;
-  bottom: 8px;
-  width: 2px;
-  border-radius: 99px;
-  background: linear-gradient(180deg, var(--qsc-gold), #76A68F);
-  box-shadow: 0 0 14px rgba(212,175,55,.28);
-}
-
-/* Streamlit's bottom account/settings control can visually duplicate Settings
-   in this app. Hide only the standard sidebar menu/footer control if present. */
-section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] {
-  border-top: 1px solid rgba(255,255,255,.045);
-}
-
-/* ---------- Dashboard header ---------- */
-
+/* --------------------------------------------------------------------------
+   Header
+   -------------------------------------------------------------------------- */
 .qsc-header {
-  position: relative;
   display: flex;
   align-items: center;
-  gap: 16px;
-  min-height: 74px;
-  margin: .2rem 0 1.35rem;
-}
-
-.qsc-header::after {
-  content: "";
-  position: absolute;
-  left: 58px;
-  bottom: -22px;
-  width: 250px;
-  height: 44px;
-  background: radial-gradient(ellipse, rgba(30,118,85,.13), transparent 68%);
-  filter: blur(9px);
-  pointer-events: none;
+  gap: 14px;
+  margin: 0 0 1rem;
 }
 
 .qsc-header .emoji {
-  width: 52px;
-  height: 52px;
-  flex: 0 0 52px;
+  width: 48px;
+  height: 48px;
   display: grid;
   place-items: center;
-  border-radius: 16px;
+  flex: 0 0 48px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.035);
+  border: 1px solid rgba(212,175,55,.16);
+  box-shadow: 0 0 24px rgba(212,175,55,.05);
   font-size: 1.45rem;
-  background:
-    radial-gradient(circle at 50% 30%, rgba(212,175,55,.18), transparent 54%),
-    rgba(255,255,255,.035);
-  border: 1px solid rgba(212,175,55,.14);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.07),
-    0 8px 30px rgba(0,0,0,.24);
 }
 
 .qsc-header h1 {
   margin: 0 !important;
-  color: #F6F8F7 !important;
-  font-size: clamp(1.7rem, 2.4vw, 2.25rem) !important;
-  line-height: 1.05 !important;
-  letter-spacing: -.045em !important;
-  font-weight: 700 !important;
-}
-
-.qsc-header p {
-  margin: .52rem 0 0 !important;
-  color: var(--qsc-muted) !important;
-  font-size: .92rem !important;
-  line-height: 1.5 !important;
-}
-
-/* ---------- Command / AI search ---------- */
-
-div[data-testid="stTextInput"] {
-  margin-top: .42rem !important;
-}
-
-div[data-testid="stTextInput"] > div {
-  background: transparent !important;
-}
-
-div[data-testid="stTextInput"] input {
-  height: 50px !important;
-  padding: 0 1rem !important;
-  border-radius: 15px !important;
   color: var(--qsc-text) !important;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025)),
-    rgba(10,15,18,.70) !important;
-  border: 1px solid rgba(255,255,255,.09) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.045),
-    0 16px 38px rgba(0,0,0,.20) !important;
-  outline: none !important;
-  transition:
-    border-color .25s var(--qsc-ease),
-    box-shadow .25s var(--qsc-ease),
-    background .25s var(--qsc-ease) !important;
-}
-
-div[data-testid="stTextInput"] input::placeholder {
-  color: #6F7C77 !important;
-}
-
-div[data-testid="stTextInput"] input:focus {
-  border-color: rgba(212,175,55,.35) !important;
-  background: rgba(11,17,20,.88) !important;
-  box-shadow:
-    0 0 0 3px rgba(212,175,55,.06),
-    0 14px 42px rgba(0,0,0,.25),
-    0 0 32px rgba(212,175,55,.06) !important;
-}
-
-/* ---------- Metric cards ---------- */
-
-[data-testid="stHorizontalBlock"] {
-  gap: 14px !important;
-}
-
-.qsc-stat {
-  position: relative;
-  min-height: 118px;
-  padding: 1rem 1.05rem 1rem 1.12rem;
-  overflow: hidden;
-  border-radius: var(--qsc-radius-lg);
-  background:
-    radial-gradient(circle at 82% 14%, rgba(212,175,55,.09), transparent 28%),
-    linear-gradient(145deg, rgba(19,29,31,.86), rgba(10,16,18,.88));
-  border: 1px solid rgba(255,255,255,.08);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.045),
-    var(--qsc-shadow);
-  isolation: isolate;
-  transition:
-    transform .3s var(--qsc-ease),
-    border-color .3s var(--qsc-ease),
-    box-shadow .3s var(--qsc-ease),
-    background .3s var(--qsc-ease);
-  animation: qsc-slide-up .55s var(--qsc-ease) both;
-}
-
-.qsc-stat::before {
-  content: "";
-  position: absolute;
-  width: 150px;
-  height: 150px;
-  right: -52px;
-  top: -72px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(30,118,85,.18), transparent 65%);
-  filter: blur(6px);
-  z-index: -1;
-  transition: transform .4s var(--qsc-ease);
-}
-
-.qsc-stat::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(120deg, transparent 24%, rgba(255,255,255,.045) 38%, transparent 50%);
-  transform: translateX(-125%);
-  transition: transform .75s var(--qsc-ease);
-  pointer-events: none;
-}
-
-.qsc-stat:hover {
-  transform: translateY(-3px) scale(1.02);
-  border-color: rgba(212,175,55,.22);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.06),
-    0 18px 44px rgba(0,0,0,.34),
-    0 0 30px rgba(30,118,85,.07);
-}
-
-.qsc-stat:hover::before {
-  transform: scale(1.16);
-}
-
-.qsc-stat:hover::after {
-  transform: translateX(125%);
-}
-
-.qsc-stat .value {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  color: var(--qsc-text) !important;
-  font-size: clamp(1.55rem, 2.2vw, 2rem) !important;
+  font-size: 2rem !important;
   line-height: 1.1 !important;
   font-weight: 700 !important;
   letter-spacing: -.035em !important;
-  text-shadow: 0 0 26px rgba(255,255,255,.08);
+}
+
+.qsc-header p {
+  margin: .4rem 0 0 !important;
+  color: var(--qsc-muted) !important;
+  font-size: .92rem !important;
+}
+
+/* --------------------------------------------------------------------------
+   Search bar — quiet Cmd+K appearance without changing Streamlit layout.
+   -------------------------------------------------------------------------- */
+div[data-testid='stTextInput'] input {
+  height: 48px !important;
+  border-radius: 13px !important;
+  padding: 0 14px !important;
+  color: var(--qsc-text) !important;
+  background: rgba(16,22,25,.78) !important;
+  border: 1px solid rgba(255,255,255,.09) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025) !important;
+}
+
+div[data-testid='stTextInput'] input:focus {
+  border-color: rgba(212,175,55,.28) !important;
+  box-shadow: 0 0 0 2px rgba(212,175,55,.055) !important;
+}
+
+div[data-testid='stTextInput'] input::placeholder {
+  color: #728079 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Metric cards
+   Existing app.py already supplies the 4 columns and .qsc-stat markup.
+   -------------------------------------------------------------------------- */
+.qsc-stat {
+  position: relative;
+  min-height: 112px;
+  overflow: hidden;
+  padding: 18px 18px 15px;
+  border-radius: var(--qsc-radius);
+  background:
+    radial-gradient(120px 70px at 88% 10%, rgba(212,175,55,.07), transparent 75%),
+    var(--qsc-card);
+  border: 1px solid var(--qsc-border);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025), 0 12px 34px rgba(0,0,0,.20);
+  transition: transform .25s var(--qsc-ease), border-color .25s var(--qsc-ease), box-shadow .25s var(--qsc-ease);
+}
+
+.qsc-stat:hover {
+  transform: translateY(-2px) scale(1.012);
+  border-color: rgba(212,175,55,.20);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035), 0 16px 40px rgba(0,0,0,.26), 0 0 24px rgba(212,175,55,.035);
+}
+
+.qsc-stat .value {
+  color: var(--qsc-text) !important;
+  font-size: 1.75rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -.035em;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
 }
 
 .qsc-stat .label {
-  margin-top: .6rem;
+  margin-top: 9px;
   color: var(--qsc-muted) !important;
   font-size: .76rem !important;
-  font-weight: 500 !important;
-  letter-spacing: .025em !important;
-  text-transform: uppercase;
+  font-weight: 600 !important;
+  letter-spacing: .04em;
 }
 
-.qsc-stat:nth-child(1) .value { color: #F4B53A !important; }
-.qsc-stat:nth-child(2) .value { color: #E6C85E !important; }
-.qsc-stat:nth-child(3) .value { color: #77C8A3 !important; }
-.qsc-stat:nth-child(4) .value { color: #EBC55A !important; }
-
-/* Gentle streak breathing */
-.qsc-stat:nth-child(1) .value {
-  animation: qsc-breathe 2s ease-in-out infinite;
-  transform-origin: left center;
+/* Preserve the familiar emoji icons, but make them look deliberate. */
+.qsc-stat .value::first-letter {
+  filter: saturate(.8);
 }
 
-/* ---------- Generic glass cards ---------- */
-
+/* --------------------------------------------------------------------------
+   Cards
+   -------------------------------------------------------------------------- */
 .qsc-card {
   position: relative;
   overflow: hidden;
-  border-radius: var(--qsc-radius-xl);
+  margin-top: 14px;
+  padding: 20px 22px;
+  border-radius: var(--qsc-radius);
   background:
-    radial-gradient(circle at 92% 0%, rgba(212,175,55,.045), transparent 24%),
-    linear-gradient(145deg, rgba(12,27,21,.85), rgba(10,15,18,.90));
-  border: 1px solid var(--qsc-line);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.035),
-    0 20px 70px rgba(0,0,0,.28);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  margin-top: 1rem;
-  padding: 1.3rem 1.35rem;
-  transition:
-    transform .3s var(--qsc-ease),
-    border-color .3s var(--qsc-ease),
-    box-shadow .3s var(--qsc-ease);
+    radial-gradient(500px 180px at 100% 0%, rgba(30,91,69,.07), transparent 72%),
+    linear-gradient(145deg, rgba(10,24,19,.72), rgba(13,19,22,.84));
+  border: 1px solid var(--qsc-border);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025), 0 14px 45px rgba(0,0,0,.20);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: border-color .25s var(--qsc-ease), box-shadow .25s var(--qsc-ease), transform .25s var(--qsc-ease);
 }
 
 .qsc-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(212,175,55,.17);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.05),
-    0 24px 78px rgba(0,0,0,.34),
-    0 0 38px rgba(30,118,85,.055);
-}
-
-.qsc-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(135deg, rgba(255,255,255,.025), transparent 22%, transparent 78%, rgba(212,175,55,.02));
-  pointer-events: none;
+  border-color: rgba(212,175,55,.14);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.03), 0 18px 50px rgba(0,0,0,.23);
 }
 
 .qsc-card-tight {
-  min-height: 118px;
-  padding: 1.15rem 1.2rem;
+  min-height: 105px;
+  padding: 18px 19px;
 }
 
-/* ---------- Verse of the Day ---------- */
-
 .qsc-card-header {
-  position: relative;
-  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding-bottom: .95rem;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid rgba(255,255,255,.06);
+  margin-bottom: 4px;
 }
 
 .qsc-label {
-  color: #83958D !important;
-  font-size: .70rem !important;
+  color: #83948d !important;
+  font-size: .69rem !important;
   font-weight: 700 !important;
-  letter-spacing: .11em !important;
+  letter-spacing: .09em !important;
   text-transform: uppercase;
 }
 
 .qsc-vod-tag {
-  display: inline-flex;
-  align-items: center;
-  min-height: 30px;
-  padding: .38rem .68rem;
-  border-radius: 999px;
-  color: #E7CD76 !important;
-  background: rgba(212,175,55,.075);
-  border: 1px solid rgba(212,175,55,.13);
-  font-size: .72rem !important;
+  color: #dcc66c !important;
+  font-size: .78rem !important;
   font-weight: 600 !important;
-  white-space: nowrap;
 }
 
-.qsc-card .arabic-text,
+.qsc-tag {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: #d8c16c !important;
+  background: rgba(212,175,55,.055);
+  border: 1px solid rgba(212,175,55,.11);
+  font-size: .7rem !important;
+  font-weight: 600 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Arabic / Urdu typography
+   -------------------------------------------------------------------------- */
 .arabic-text {
-  position: relative;
-  z-index: 2;
-  padding: 1rem .75rem 1.2rem;
   direction: rtl;
-  text-align: center;
-  font-family: "Amiri", "Scheherazade New", serif !important;
-  font-size: clamp(2rem, 3.5vw, 3.05rem) !important;
-  font-weight: 700;
+  text-align: right;
+  font-family: 'Amiri', 'Scheherazade New', serif !important;
+  color: #f8f8f2 !important;
   line-height: 2.0 !important;
-  color: #F8F6EE !important;
   letter-spacing: 0 !important;
-  text-shadow: 0 6px 30px rgba(0,0,0,.28);
   overflow: visible !important;
+  padding: 12px 4px 8px;
+  text-shadow: 0 2px 18px rgba(0,0,0,.22);
 }
-
-.qsc-card .arabic-text::before,
-.qsc-card .arabic-text::after {
-  content: "";
-  position: absolute;
-  width: 88%;
-  height: 18px;
-  left: 6%;
-  opacity: .28;
-  pointer-events: none;
-  background:
-    repeating-linear-gradient(
-      90deg,
-      transparent 0 10px,
-      rgba(212,175,55,.22) 10px 11px,
-      transparent 11px 21px
-    );
-}
-
-.qsc-card .arabic-text::before { top: -2px; }
-.qsc-card .arabic-text::after { bottom: -1px; }
 
 .urdu-text {
   direction: rtl;
   text-align: right;
-  font-family: "Noto Nastaliq Urdu", "Amiri", serif !important;
-  color: #EEF3F0 !important;
-  font-size: 1.25rem !important;
+  font-family: 'Noto Nastaliq Urdu', 'Amiri', serif !important;
+  color: #eef3f0 !important;
+  font-size: 1.2rem !important;
   line-height: 2.15 !important;
-  padding: .75rem 0 !important;
 }
 
-/* Translation / supporting copy */
 .qsc-card p {
-  color: var(--qsc-text-2) !important;
-  line-height: 1.75 !important;
+  color: var(--qsc-sub) !important;
+  line-height: 1.7 !important;
 }
 
-.qsc-card p[style*="italic"] {
-  color: #789087 !important;
-}
-
-.qsc-card strong, .qsc-card b {
-  color: #F5F7F6 !important;
-}
-
-/* ---------- Buttons ---------- */
-
+/* --------------------------------------------------------------------------
+   Buttons + progress
+   -------------------------------------------------------------------------- */
 .stButton > button,
-div[data-testid="stFormSubmitButton"] button {
-  min-height: 42px !important;
-  padding: 0 .95rem !important;
-  border-radius: 12px !important;
-  color: #F6F8F7 !important;
-  background:
-    linear-gradient(180deg, rgba(31,54,45,.88), rgba(13,31,24,.88)) !important;
-  border: 1px solid rgba(212,175,55,.18) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.05),
-    0 8px 28px rgba(0,0,0,.18) !important;
+div[data-testid='stFormSubmitButton'] button {
+  min-height: 40px !important;
+  border-radius: 11px !important;
+  color: #f0f5f2 !important;
+  background: #10251d !important;
+  border: 1px solid rgba(212,175,55,.14) !important;
   font-weight: 600 !important;
-  transition:
-    transform .22s var(--qsc-ease),
-    border-color .22s var(--qsc-ease),
-    box-shadow .22s var(--qsc-ease),
-    background .22s var(--qsc-ease) !important;
+  transition: background .2s var(--qsc-ease), border-color .2s var(--qsc-ease), transform .2s var(--qsc-ease) !important;
 }
 
 .stButton > button:hover,
-div[data-testid="stFormSubmitButton"] button:hover {
+div[data-testid='stFormSubmitButton'] button:hover {
+  background: #143025 !important;
+  border-color: rgba(212,175,55,.26) !important;
   transform: translateY(-1px);
-  border-color: rgba(212,175,55,.38) !important;
-  background:
-    linear-gradient(180deg, rgba(38,68,55,.95), rgba(14,37,28,.96)) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.06),
-    0 10px 30px rgba(0,0,0,.22),
-    0 0 26px rgba(212,175,55,.06) !important;
 }
 
-.stButton > button:active,
-div[data-testid="stFormSubmitButton"] button:active {
-  transform: translateY(0) scale(.985);
-}
-
-/* ---------- Inputs / progress / checkbox / expander ---------- */
-
-div[data-testid="stTextInput"] input,
-div[data-testid="stNumberInput"] input,
-div[data-testid="stSelectbox"] div[data-baseweb="select"] > div,
-textarea {
-  color: var(--qsc-text) !important;
-  background: rgba(8,14,17,.78) !important;
-  border-color: rgba(255,255,255,.09) !important;
-}
-
-div[data-testid="stProgress"] > div > div {
+[data-testid='stProgress'] > div > div {
   background: rgba(255,255,255,.05) !important;
   border-radius: 999px !important;
 }
 
-div[data-testid="stProgress"] > div > div > div {
-  background: linear-gradient(90deg, #8B7420 0%, var(--qsc-gold) 60%, #F2CD62 100%) !important;
+[data-testid='stProgress'] > div > div > div {
+  background: linear-gradient(90deg, #836d1e, #d4af37) !important;
   border-radius: 999px !important;
-  box-shadow: 0 0 16px rgba(212,175,55,.18);
 }
 
-[data-testid="stExpander"] details {
+[data-testid='stAlert'] {
+  border-radius: 12px !important;
   border: 1px solid rgba(255,255,255,.07) !important;
-  border-radius: 13px !important;
-  background: rgba(255,255,255,.02) !important;
+  background: rgba(15,29,24,.72) !important;
 }
 
-[data-testid="stExpander"] summary {
-  color: var(--qsc-text-2) !important;
+[data-testid='stExpander'] details {
+  border-radius: 12px !important;
+  border-color: rgba(255,255,255,.07) !important;
+  background: rgba(255,255,255,.015) !important;
 }
 
-input[type="checkbox"] {
-  accent-color: var(--qsc-gold) !important;
+/* --------------------------------------------------------------------------
+   Simple entrance motion — no transforms on layout containers.
+   -------------------------------------------------------------------------- */
+.qsc-stat, .qsc-card {
+  animation: qsc-fade-up .35s ease both;
 }
 
-/* ---------- Quick links ---------- */
-
-.qsc-card-tight b {
-  font-size: .98rem;
-  font-weight: 650;
-  letter-spacing: -.015em;
+@keyframes qsc-fade-up {
+  from { opacity: .0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.qsc-card-tight span {
-  color: var(--qsc-muted) !important;
-}
-
-.qsc-tag {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: .28rem .52rem;
-  border-radius: 999px;
-  color: #D8C16C !important;
-  background: rgba(212,175,55,.065);
-  border: 1px solid rgba(212,175,55,.11);
-  font-size: .69rem !important;
-  font-weight: 650 !important;
-  white-space: nowrap;
-}
-
-/* ---------- Alerts / captions ---------- */
-
-[data-testid="stAlert"] {
-  background: rgba(16,33,27,.72) !important;
-  border: 1px solid rgba(120,169,144,.14) !important;
-  border-radius: 14px !important;
-  color: var(--qsc-text-2) !important;
-}
-
-.stCaption, [data-testid="stCaptionContainer"] {
-  color: var(--qsc-muted) !important;
-}
-
-/* ---------- Audio ---------- */
-
-audio {
-  width: 100%;
-  border-radius: 12px;
-  filter: saturate(.75) brightness(.87);
-}
-
-.qsc-audio-shell {
-  margin-top: .6rem;
-  padding: .8rem;
-  border: 1px solid rgba(255,255,255,.065);
-  border-radius: 15px;
-  background: rgba(255,255,255,.018);
-}
-
-.qsc-equalizer {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  height: 24px;
-  margin-top: .7rem;
-  opacity: .72;
-}
-
-.qsc-equalizer span {
-  width: 3px;
-  border-radius: 99px;
-  background: linear-gradient(180deg, #E8D17D, #567C68);
-  animation: qsc-wave 1.05s ease-in-out infinite;
-  transform-origin: center;
-}
-
-.qsc-equalizer span:nth-child(1) { height: 8px;  animation-delay: -.80s; }
-.qsc-equalizer span:nth-child(2) { height: 15px; animation-delay: -.66s; }
-.qsc-equalizer span:nth-child(3) { height: 21px; animation-delay: -.52s; }
-.qsc-equalizer span:nth-child(4) { height: 13px; animation-delay: -.38s; }
-.qsc-equalizer span:nth-child(5) { height: 18px; animation-delay: -.24s; }
-.qsc-equalizer span:nth-child(6) { height: 10px; animation-delay: -.10s; }
-.qsc-equalizer span:nth-child(7) { height: 18px; animation-delay: -.62s; }
-.qsc-equalizer span:nth-child(8) { height: 12px; animation-delay: -.44s; }
-.qsc-equalizer span:nth-child(9) { height: 20px; animation-delay: -.28s; }
-.qsc-equalizer span:nth-child(10) { height: 9px; animation-delay: -.12s; }
-
-/* ---------- Reveal / motion ---------- */
-
-.qsc-card,
-.qsc-card-tight,
-.qsc-stat {
-  animation: qsc-slide-up .55s var(--qsc-ease) both;
-}
-
-.qsc-card:nth-of-type(2),
-.qsc-stat:nth-of-type(2) { animation-delay: .05s; }
-
-.qsc-card:nth-of-type(3),
-.qsc-stat:nth-of-type(3) { animation-delay: .10s; }
-
-@keyframes qsc-slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes qsc-breathe {
-  0%, 100% { opacity: .84; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.035); }
-}
-
-@keyframes qsc-wave {
-  0%, 100% { transform: scaleY(.55); opacity: .65; }
-  50% { transform: scaleY(1.18); opacity: 1; }
-}
-
-/* Respect reduced-motion accessibility settings. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
-    animation-duration: .01ms !important;
-    animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
-    transition-duration: .01ms !important;
+    animation: none !important;
+    transition: none !important;
   }
 }
 
-/* ---------- Responsive ---------- */
-
-@media (max-width: 1050px) {
-  section[data-testid="stSidebar"] {
-    width: 260px !important;
-    min-width: 260px !important;
-  }
-
+@media (max-width: 900px) {
   .main .block-container {
-    padding: 1.6rem 1.5rem 3rem !important;
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
-}
-
-@media (max-width: 760px) {
-  .main .block-container {
-    padding: 1.1rem .9rem 2.5rem !important;
-  }
-
-  .qsc-header {
-    align-items: flex-start;
-  }
-
-  .qsc-header .emoji {
-    width: 46px;
-    height: 46px;
-    flex-basis: 46px;
-  }
-
-  .qsc-vod-tag {
-    white-space: normal;
-    text-align: right;
-  }
-
-  .qsc-card {
-    padding: 1rem;
-    border-radius: 19px;
-  }
-
-  .qsc-card .arabic-text,
-  .arabic-text {
-    font-size: 1.75rem !important;
-    line-height: 2.0 !important;
-  }
-}
-
-
-/* ---------- Inline SVG icon system (recommended app.py patch) ---------- */
-
-.qsc-stat .value {
-  gap: 10px;
-}
-
-.qsc-stat-icon {
-  width: 36px;
-  height: 36px;
-  display: inline-grid;
-  place-items: center;
-  flex: 0 0 36px;
-  border-radius: 11px;
-  color: currentColor;
-  background: rgba(255,255,255,.035);
-  border: 1px solid rgba(255,255,255,.06);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.045);
-}
-
-.qsc-stat-icon svg {
-  width: 19px;
-  height: 19px;
-  stroke: currentColor;
-}
-
-.qsc-stat-number {
-  display: inline-block;
-  min-width: 1.4ch;
-  font-variant-numeric: tabular-nums;
-}
-
-.qsc-action-icon {
-  width: 18px;
-  height: 18px;
-  vertical-align: -4px;
-  margin-right: 7px;
-  stroke: currentColor;
-}
-
-.qsc-link-icon {
-  width: 30px;
-  height: 30px;
-  display: inline-grid;
-  place-items: center;
-  margin-bottom: 10px;
-  border-radius: 9px;
-  color: #D8C16C;
-  background: rgba(212,175,55,.055);
-  border: 1px solid rgba(212,175,55,.10);
-}
-
-.qsc-link-icon svg {
-  width: 16px;
-  height: 16px;
-  stroke: currentColor;
-}
-
-.qsc-reveal-1 { animation-delay: .04s !important; }
-.qsc-reveal-2 { animation-delay: .08s !important; }
-.qsc-reveal-3 { animation-delay: .12s !important; }
-.qsc-reveal-4 { animation-delay: .16s !important; }
-
-/* A true "mouse-following" glare needs two CSS variables set from JS.
-   The fallback is still a smooth moving sheen and requires no JS. */
-.qsc-spotlight {
-  --mx: 50%;
-  --my: 50%;
-  position: relative;
-  overflow: hidden;
-}
-
-.qsc-spotlight::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(
-      180px circle at var(--mx) var(--my),
-      rgba(255,255,255,.055),
-      transparent 62%
-    );
-  opacity: 0;
-  transition: opacity .22s ease;
-}
-
-.qsc-spotlight:hover::after {
-  opacity: 1;
 }
