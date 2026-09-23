@@ -18,6 +18,8 @@
    - Kept the ambient effects (bgDrift, glowPulse, sheen, badgeGlow) —
      those are the "celestial" atmosphere, not entrance choreography.
    - Added prefers-reduced-motion support.
+   - Chat input (st.chat_input) now matches the glass theme instead of
+     Streamlit's default flat bar + red send button.
    - New OPT-IN classes for the blueprint's Dashboard/Reading/Audio
      screens: .qsc-hero, .qsc-last-read, .qsc-tabs/.qsc-tab,
      .qsc-audio-pill, .qsc-glow-success, .qsc-tag-dawn. Nothing breaks
@@ -64,8 +66,7 @@
   --gold-legacy: var(--gold);
 }
 
-/* Whole app background: indigo-to-teal atmosphere that drifts slowly —
-   the one continuous ambient effect in the whole theme. */
+/* Whole app background */
 [data-testid="stAppViewContainer"], .stApp{
   background:
     radial-gradient(120% 120% at 12% -10%, var(--bg-indigo) 0%, transparent 55%),
@@ -118,7 +119,7 @@
   color: var(--text) !important;
 }
 
-/* Typography — Inter for body/UI, Plus Jakarta Sans for headings */
+/* Typography */
 html, body, [class*="css"]{
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
@@ -143,7 +144,6 @@ h1, h2, h3, h4{
   line-height: 2.6;
   color: var(--text-soft);
 }
-/* Body/translation copy reads best under ~62 characters per line */
 p, .qsc-card p{ max-width: 62ch; }
 
 /* ---------- Glass cards — "Raised" elevation tier ---------- */
@@ -181,8 +181,6 @@ p, .qsc-card p{ max-width: 62ch; }
 .qsc-tag{ color: var(--gold); font-weight: 600; font-size: 0.85rem; letter-spacing: 0.02em; }
 .qsc-tag-dawn{ color: var(--dawn); font-weight: 600; font-size: 0.85rem; letter-spacing: 0.02em; }
 
-/* Section labels — sentence case + a small gold marker instead of
-   ALL-CAPS + tracking */
 .qsc-label{
   color: var(--text-muted);
   font-size: 0.8rem;
@@ -213,7 +211,6 @@ p, .qsc-card p{ max-width: 62ch; }
   100% { background-position: -200% 0; }
 }
 
-/* App header / logo block */
 .qsc-header{ display:flex; align-items:center; gap:14px; margin-bottom: 6px; }
 .qsc-header .emoji{
   display:inline-flex; align-items:center; justify-content:center;
@@ -255,16 +252,12 @@ p, .qsc-card p{ max-width: 62ch; }
 .qsc-stat .value{ font-family:'Plus Jakarta Sans',sans-serif; font-size:1.85rem; font-weight:700; color: var(--green); letter-spacing:-0.01em; }
 .qsc-stat .label{ margin-top:4px; font-size:0.78rem; color: var(--text-muted); }
 
-/* ---------- One deliberate entrance — apply to a single hero element
-   per page (Verse of the Day, or the ayah currently in focus). Do not
-   apply this to more than one element at a time. ---------- */
 .qsc-hero{ animation: heroReveal 700ms cubic-bezier(.2,.7,.3,1) both; }
 @keyframes heroReveal{
   from{ opacity:0; transform: translateY(10px) scale(.99); }
   to  { opacity:1; transform: translateY(0) scale(1); }
 }
 
-/* ---------- New: Last-Read widget — "Floating" elevation tier ---------- */
 .qsc-last-read{
   position: sticky; top: 12px; z-index: 5;
   display:flex; align-items:center; gap:14px;
@@ -278,7 +271,6 @@ p, .qsc-card p{ max-width: 62ch; }
   box-shadow: 0 20px 48px rgba(0,0,0,0.5);
 }
 
-/* ---------- New: segmented tab switcher (Surah / Juz / Bookmarks) ---------- */
 .qsc-tabs{
   display:inline-flex; gap:4px; padding:4px;
   background: var(--surface-glass-soft);
@@ -296,7 +288,6 @@ p, .qsc-card p{ max-width: 62ch; }
   box-shadow: 0 4px 14px rgba(0,0,0,.3);
 }
 
-/* ---------- New: floating audio pill (Reading screen mini-player) ---------- */
 .qsc-audio-pill{
   position:fixed; left:50%; bottom:18px; transform:translateX(-50%);
   display:flex; align-items:center; gap:10px;
@@ -311,7 +302,6 @@ p, .qsc-card p{ max-width: 62ch; }
 }
 .qsc-audio-pill.faded{ opacity: .15; }
 
-/* ---------- New: one-shot success glow (goal complete, 90%+ recitation) --- */
 .qsc-glow-success{ animation: glowPulseOnce 900ms ease-out; }
 @keyframes glowPulseOnce{
   0%  { box-shadow: 0 0 0 rgba(46,204,113,0); }
@@ -349,6 +339,48 @@ p, .qsc-card p{ max-width: 62ch; }
   border-color: var(--gold) !important;
   box-shadow: 0 0 0 3px rgba(212,175,55,0.15) !important;
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+/* ---------- Chat input (AI Companion) — was plain dark + red button,
+   now matches the glass theme + gold/emerald accent ---------- */
+[data-testid="stChatInput"]{
+  background: var(--surface-glass) !important;
+  backdrop-filter: blur(var(--blur-md)) saturate(150%);
+  -webkit-backdrop-filter: blur(var(--blur-md)) saturate(150%);
+  border: 1px solid var(--border-glass) !important;
+  border-radius: 999px !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  padding: 2px 4px 2px 18px !important;
+}
+[data-testid="stChatInput"]:focus-within{
+  border-color: var(--gold) !important;
+  box-shadow: 0 0 0 3px rgba(212,175,55,0.15), 0 10px 30px rgba(0,0,0,0.35);
+}
+[data-testid="stChatInput"] textarea{
+  background: transparent !important;
+  color: var(--text) !important;
+  font-family: 'Inter', sans-serif !important;
+}
+[data-testid="stChatInput"] textarea::placeholder{ color: var(--text-muted) !important; }
+/* the send button — covers both the current testid and a fallback so this
+   still works if a Streamlit update renames it */
+[data-testid="stChatInputSubmitButton"],
+[data-testid="stChatInput"] button{
+  background: linear-gradient(135deg, #1f7a4d 0%, #14512f 100%) !important;
+  border: 1px solid var(--border-gold) !important;
+  color: var(--text) !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+[data-testid="stChatInputSubmitButton"]:hover,
+[data-testid="stChatInput"] button:hover{
+  box-shadow: 0 0 0 1px var(--gold) inset;
+  transform: translateY(-1px) scale(1.03);
+}
+/* the fixed bar the chat input sits in at the bottom of the page */
+[data-testid="stBottomBlockContainer"], [data-testid="stBottom"]{
+  background: linear-gradient(180deg, transparent 0%, rgba(4,7,12,0.75) 40%, rgba(4,7,12,0.92) 100%) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 /* Chat bubbles */
@@ -391,10 +423,8 @@ p, .qsc-card p{ max-width: 62ch; }
 ::-webkit-scrollbar{ width:8px; height:8px; }
 ::-webkit-scrollbar-thumb{ background: var(--surface-glass-soft); border-radius: 8px; }
 
-/* Checkboxes / toggles */
 .stCheckbox, .stToggle{ transition: opacity 0.2s ease; }
 
-/* Sidebar nav */
 [data-testid="stSidebarNav"] a,
 [data-testid="stSidebarNavLink"]{
   border-radius: var(--radius-sm) !important;
@@ -412,7 +442,6 @@ p, .qsc-card p{ max-width: 62ch; }
   border-left: 3px solid var(--gold);
 }
 
-/* Expander (Settings panel) */
 [data-testid="stExpander"]{
   border-radius: var(--radius-md) !important;
   border: 1px solid var(--border-glass) !important;
@@ -421,7 +450,6 @@ p, .qsc-card p{ max-width: 62ch; }
 }
 [data-testid="stExpander"]:hover{ border-color: var(--border-gold) !important; }
 
-/* Respect reduced-motion preferences */
 @media (prefers-reduced-motion: reduce){
   *, *::before, *::after{
     animation-duration: 0.001ms !important;
