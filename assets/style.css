@@ -21,16 +21,49 @@
   --radius-sm:10px;
 }
 
-/* Whole app background: fading emerald gradient, fixed so it doesn't
-   repeat/scroll oddly */
+/* Whole app background: fading emerald gradient that slowly drifts —
+   gives the whole app a subtle "alive" feeling without being distracting */
 [data-testid="stAppViewContainer"], .stApp{
-  background: radial-gradient(120% 120% at 15% 0%, var(--bg-end) 0%, var(--bg-start) 55%, #020a07 100%) fixed;
+  background:
+    radial-gradient(120% 120% at 15% 0%, var(--bg-end) 0%, var(--bg-start) 55%, #020a07 100%) fixed,
+    radial-gradient(60% 50% at 85% -10%, rgba(212,175,55,0.10) 0%, transparent 60%) fixed;
+  background-blend-mode: normal;
   color: var(--text);
+  animation: bgDrift 22s ease-in-out infinite alternate;
+}
+@keyframes bgDrift{
+  0%   { filter: hue-rotate(0deg) brightness(1); }
+  50%  { filter: hue-rotate(4deg) brightness(1.03); }
+  100% { filter: hue-rotate(-2deg) brightness(1); }
 }
 
 [data-testid="stHeader"]{
-  background: transparent;
+  background: linear-gradient(180deg, rgba(4,18,12,0.85) 0%, rgba(4,18,12,0) 100%);
+  backdrop-filter: blur(6px);
 }
+
+/* Streamlit reserves a lot of empty space above the first widget by
+   default — tighten it and give it a soft glow instead of dead space */
+.main .block-container{
+  padding-top: 1.6rem !important;
+  max-width: 1200px;
+  position: relative;
+}
+.main .block-container::before{
+  content:"";
+  position:absolute;
+  top:-40px; left:50%; transform:translateX(-50%);
+  width:70%; height:220px;
+  background: radial-gradient(ellipse at center, rgba(46,204,113,0.10) 0%, rgba(212,175,55,0.05) 45%, transparent 75%);
+  pointer-events:none;
+  z-index:0;
+  animation: glowPulse 6s ease-in-out infinite;
+}
+@keyframes glowPulse{
+  0%, 100% { opacity:0.6; transform:translateX(-50%) scale(1); }
+  50%      { opacity:1;   transform:translateX(-50%) scale(1.05); }
+}
+.main .block-container > div{ position: relative; z-index: 1; }
 
 /* Sidebar: slightly darker, subtle right border, curved edge feel */
 [data-testid="stSidebar"]{
@@ -65,12 +98,20 @@ h1, h2, h3, h4 { color: var(--text) !important; font-weight: 600; letter-spacing
 
 /* ---------- Curved "card" containers ---------- */
 .qsc-card{
+  position: relative;
   background: linear-gradient(160deg, var(--surface) 0%, var(--surface-soft) 100%);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 28px 30px;
   margin-bottom: 20px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.03);
+  overflow: hidden;
+}
+.qsc-card::before{
+  content:"";
+  position:absolute; top:0; left:0; right:0; height:3px;
+  background: linear-gradient(90deg, var(--gold), transparent 60%);
+  opacity:0.8;
 }
 .qsc-card-tight{
   padding: 18px 20px;
@@ -111,14 +152,30 @@ h1, h2, h3, h4 { color: var(--text) !important; font-weight: 600; letter-spacing
 
 /* Streak / stat pills */
 .qsc-stat{
-  background: var(--surface-soft);
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(160deg, var(--surface-soft) 0%, var(--surface) 100%);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 16px 18px;
+  padding: 20px 18px 18px;
   text-align:center;
+  box-shadow: 0 10px 26px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.03);
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 }
-.qsc-stat .value{ font-size:1.6rem; font-weight:700; color: var(--green); }
-.qsc-stat .label{ font-size:0.78rem; color: var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; }
+.qsc-stat::before{
+  content:"";
+  position:absolute; top:-40%; right:-30%;
+  width:120px; height:120px; border-radius:50%;
+  background: radial-gradient(circle, rgba(212,175,55,0.16) 0%, transparent 70%);
+  pointer-events:none;
+}
+.qsc-stat:hover{
+  transform: translateY(-3px);
+  border-color: rgba(212,175,55,0.4);
+  box-shadow: 0 14px 32px rgba(0,0,0,0.4);
+}
+.qsc-stat .value{ font-size:1.85rem; font-weight:700; color: var(--green); letter-spacing:-0.01em; }
+.qsc-stat .label{ margin-top:4px; font-size:0.78rem; color: var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; }
 
 /* Buttons */
 .stButton>button, .stDownloadButton>button{
@@ -169,6 +226,123 @@ h1, h2, h3, h4 { color: var(--text) !important; font-weight: 600; letter-spacing
 /* Verse-of-the-day surah tag top right, like the reference dashboard */
 .qsc-vod-tag{ color: var(--gold); font-weight:600; }
 
+/* Numbered circular ayah badge (Browse Quran / Recitation Coach) */
+.qsc-ayah-badge{
+  display:flex; align-items:center; justify-content:center;
+  width:34px; height:34px; border-radius:50%;
+  background: var(--surface-soft);
+  border: 1px solid rgba(212,175,55,0.4);
+  color: var(--gold);
+  font-weight:600; font-size:0.85rem;
+  margin-top: 6px;
+}
+
+/* Quick-link tiles on the dashboard */
+.qsc-card-tight{
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+.qsc-card-tight:hover{
+  transform: translateY(-2px);
+  border-color: rgba(212,175,55,0.4);
+}
+
+/* App header: bigger emoji badge with a soft glow, like a real app icon */
+.qsc-header .emoji{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:48px; height:48px; border-radius:14px;
+  background: radial-gradient(circle at 30% 20%, rgba(212,175,55,0.22), rgba(212,175,55,0.04));
+  border: 1px solid var(--border);
+  font-size:1.7rem;
+}
+.qsc-header h1{ font-size:1.8rem; }
+
 /* subtle scrollbar */
 ::-webkit-scrollbar{ width:8px; height:8px; }
 ::-webkit-scrollbar-thumb{ background: var(--surface-soft); border-radius: 8px; }
+
+/* ===========================================================
+   Motion — gentle entrance animations so the app feels alive
+   instead of static. Staggered by element order.
+   =========================================================== */
+@keyframes fadeSlideUp{
+  from { opacity:0; transform: translateY(14px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+@keyframes fadeIn{
+  from { opacity:0; }
+  to   { opacity:1; }
+}
+
+.qsc-header{ animation: fadeSlideUp 0.55s cubic-bezier(.2,.7,.3,1) both; }
+.qsc-card{ animation: fadeSlideUp 0.6s cubic-bezier(.2,.7,.3,1) both; }
+.qsc-stat{ animation: fadeSlideUp 0.5s cubic-bezier(.2,.7,.3,1) both; }
+[data-testid="column"]:nth-of-type(1) .qsc-stat{ animation-delay: 0.02s; }
+[data-testid="column"]:nth-of-type(2) .qsc-stat{ animation-delay: 0.08s; }
+[data-testid="column"]:nth-of-type(3) .qsc-stat{ animation-delay: 0.14s; }
+[data-testid="column"]:nth-of-type(4) .qsc-stat{ animation-delay: 0.20s; }
+[data-testid="stVerticalBlock"] > [data-testid="stElementContainer"]{ animation: fadeIn 0.5s ease both; }
+
+/* Slowly shifting sheen across the gold divider under the header, echoed
+   by a matching sheen on the card top-accent — reads as "premium" without
+   being loud */
+.qsc-divider, .qsc-card::before{
+  background-size: 200% 100%;
+  animation: sheen 5s linear infinite;
+}
+.qsc-divider{
+  background-image: linear-gradient(90deg, transparent, var(--border) 20%, var(--gold) 50%, var(--border) 80%, transparent);
+}
+.qsc-card::before{
+  background-image: linear-gradient(90deg, transparent, var(--gold) 40%, #f2da8a 50%, var(--gold) 60%, transparent);
+}
+@keyframes sheen{
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* App icon badge: slow breathing glow, like a living app logo */
+.qsc-header .emoji{ animation: badgeGlow 3.4s ease-in-out infinite; }
+@keyframes badgeGlow{
+  0%, 100% { box-shadow: 0 0 0 rgba(212,175,55,0); }
+  50%      { box-shadow: 0 0 18px rgba(212,175,55,0.35); }
+}
+
+/* Focus states — inputs & buttons should visibly react, not just hover */
+.stTextInput input:focus, .stTextArea textarea:focus,
+.stSelectbox [data-baseweb="select"]:focus-within, .stNumberInput input:focus{
+  border-color: var(--gold) !important;
+  box-shadow: 0 0 0 3px rgba(212,175,55,0.15) !important;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.stButton>button:active, .stDownloadButton>button:active{ transform: translateY(0) scale(0.98); }
+
+/* Checkboxes / toggles: smoother color transition on state change */
+.stCheckbox, .stToggle{ transition: opacity 0.2s ease; }
+
+/* Sidebar nav (st.navigation) — curved, animated active/hover state so it
+   reads as a real app shell rather than default Streamlit chrome */
+[data-testid="stSidebarNav"] a,
+[data-testid="stSidebarNavLink"]{
+  border-radius: var(--radius-sm) !important;
+  margin: 2px 8px !important;
+  transition: background 0.18s ease, transform 0.18s ease, padding-left 0.18s ease;
+}
+[data-testid="stSidebarNav"] a:hover,
+[data-testid="stSidebarNavLink"]:hover{
+  background: rgba(212,175,55,0.10) !important;
+  padding-left: 4px !important;
+}
+[data-testid="stSidebarNav"] a[aria-current="page"],
+[data-testid="stSidebarNavLink"][aria-current="page"]{
+  background: linear-gradient(90deg, rgba(46,204,113,0.18), rgba(212,175,55,0.08)) !important;
+  border-left: 3px solid var(--gold);
+}
+
+/* Expander (Settings panel) — curved + smooth open */
+[data-testid="stExpander"]{
+  border-radius: var(--radius-md) !important;
+  border: 1px solid var(--border) !important;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+[data-testid="stExpander"]:hover{ border-color: rgba(212,175,55,0.35) !important; }
