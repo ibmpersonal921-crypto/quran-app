@@ -1,35 +1,79 @@
 /* ===========================================================
-   Quran Study Companion — Emerald theme
+   Quran Study Companion — "Celestial Minimalist" theme
    Loaded via utils/helpers.py -> inject_css() on every page
+
+   What changed from the previous version, and why:
+   - True glassmorphism: cards now use a semi-transparent fill +
+     backdrop-filter blur, tiered by importance (see the "Elevation"
+     block below), instead of one opaque gradient + one shadow on
+     everything.
+   - Fonts: Plus Jakarta Sans (headings/nav) + Inter (body/UI) replace
+     Poppins — a clearer display/body pairing. Amiri + Noto Nastaliq
+     Urdu are unchanged.
+   - Labels dropped ALL-CAPS + heavy letter-spacing (reads like a SaaS
+     dashboard) in favor of sentence case with a small gold marker.
+   - Removed the blanket fade-in-on-load applied to every single card,
+     stat, and element container. One deliberate reveal (.qsc-hero) is
+     enough; a religious text shouldn't cascade into view piece by piece.
+   - Kept the ambient effects (bgDrift, glowPulse, sheen, badgeGlow) —
+     those are the "celestial" atmosphere, not entrance choreography.
+   - Added prefers-reduced-motion support.
+   - New OPT-IN classes for the blueprint's Dashboard/Reading/Audio
+     screens: .qsc-hero, .qsc-last-read, .qsc-tabs/.qsc-tab,
+     .qsc-audio-pill, .qsc-glow-success, .qsc-tag-dawn. Nothing breaks
+     if you don't use them yet — every existing class name is unchanged.
    =========================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Poppins:wght@300;400;500;600;700&family=Noto+Nastaliq+Urdu:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=Noto+Nastaliq+Urdu:wght@400;600&display=swap');
 
 :root{
-  --bg-start:#04120c;
-  --bg-end:#0b2e22;
-  --surface:#0f2c22;
-  --surface-soft:#123527;
-  --border:rgba(212,175,55,0.18);
-  --gold:#d4af37;
+  /* Background */
+  --bg-indigo:#0A1220;
+  --bg-teal:#06231D;
+  --bg-void:#04070C;
+
+  /* Glass surfaces */
+  --surface-glass: rgba(20,34,32,0.55);
+  --surface-glass-soft: rgba(16,28,26,0.40);
+  --border-glass: rgba(255,255,255,0.08);
+  --border-gold: rgba(212,175,55,0.20);
+
+  /* Accents */
+  --gold:#D4AF37;
+  --gold-glow: rgba(212,175,55,0.35);
   --green:#2ecc71;
+  --dawn:#E9AFC9;
+
+  /* Text */
   --text:#f4f7f5;
   --text-soft:#b9c9c0;
   --text-muted:#7e9186;
-  --radius-lg:22px;
+
+  /* Radii */
+  --radius-lg:24px;
   --radius-md:16px;
   --radius-sm:10px;
+
+  /* Elevation tiers */
+  --blur-sm:12px;
+  --blur-md:20px;
+  --blur-lg:32px;
+
+  /* legacy alias kept so any old rule referencing --border still works */
+  --border: var(--border-gold);
+  --gold-legacy: var(--gold);
 }
 
-/* Whole app background: fading emerald gradient that slowly drifts —
-   gives the whole app a subtle "alive" feeling without being distracting */
+/* Whole app background: indigo-to-teal atmosphere that drifts slowly —
+   the one continuous ambient effect in the whole theme. */
 [data-testid="stAppViewContainer"], .stApp{
   background:
-    radial-gradient(120% 120% at 15% 0%, var(--bg-end) 0%, var(--bg-start) 55%, #020a07 100%) fixed,
-    radial-gradient(60% 50% at 85% -10%, rgba(212,175,55,0.10) 0%, transparent 60%) fixed;
-  background-blend-mode: normal;
+    radial-gradient(120% 120% at 12% -10%, var(--bg-indigo) 0%, transparent 55%),
+    radial-gradient(100% 100% at 90% 110%, var(--bg-teal) 0%, transparent 60%),
+    var(--bg-void);
+  background-attachment: fixed;
   color: var(--text);
-  animation: bgDrift 22s ease-in-out infinite alternate;
+  animation: bgDrift 26s ease-in-out infinite alternate;
 }
 @keyframes bgDrift{
   0%   { filter: hue-rotate(0deg) brightness(1); }
@@ -38,12 +82,11 @@
 }
 
 [data-testid="stHeader"]{
-  background: linear-gradient(180deg, rgba(4,18,12,0.85) 0%, rgba(4,18,12,0) 100%);
+  background: linear-gradient(180deg, rgba(4,7,12,0.85) 0%, rgba(4,7,12,0) 100%);
   backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
-/* Streamlit reserves a lot of empty space above the first widget by
-   default — tighten it and give it a soft glow instead of dead space */
 .main .block-container{
   padding-top: 1.6rem !important;
   max-width: 1200px;
@@ -65,21 +108,26 @@
 }
 .main .block-container > div{ position: relative; z-index: 1; }
 
-/* Sidebar: slightly darker, subtle right border, curved edge feel */
+/* Sidebar */
 [data-testid="stSidebar"]{
-  background: linear-gradient(180deg, #06180f 0%, #081f16 100%);
-  border-right: 1px solid var(--border);
+  background: linear-gradient(180deg, #06120c 0%, #071a12 100%);
+  border-right: 1px solid var(--border-glass);
 }
 [data-testid="stSidebar"] * { color: var(--text-soft) !important; }
 [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3{
   color: var(--text) !important;
 }
 
-/* Typography */
+/* Typography — Inter for body/UI, Plus Jakarta Sans for headings */
 html, body, [class*="css"]{
-  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
-h1, h2, h3, h4 { color: var(--text) !important; font-weight: 600; letter-spacing: -0.01em; }
+h1, h2, h3, h4{
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  color: var(--text) !important;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
 
 .arabic-text{
   font-family: 'Amiri', 'Traditional Arabic', serif;
@@ -95,16 +143,20 @@ h1, h2, h3, h4 { color: var(--text) !important; font-weight: 600; letter-spacing
   line-height: 2.6;
   color: var(--text-soft);
 }
+/* Body/translation copy reads best under ~62 characters per line */
+p, .qsc-card p{ max-width: 62ch; }
 
-/* ---------- Curved "card" containers ---------- */
+/* ---------- Glass cards — "Raised" elevation tier ---------- */
 .qsc-card{
   position: relative;
-  background: linear-gradient(160deg, var(--surface) 0%, var(--surface-soft) 100%);
-  border: 1px solid var(--border);
+  background: var(--surface-glass);
+  backdrop-filter: blur(var(--blur-md)) saturate(150%);
+  -webkit-backdrop-filter: blur(var(--blur-md)) saturate(150%);
+  border: 1px solid var(--border-glass);
   border-radius: var(--radius-lg);
   padding: 28px 30px;
   margin-bottom: 20px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.03);
+  box-shadow: 0 14px 34px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.03);
   overflow: hidden;
 }
 .qsc-card::before{
@@ -112,55 +164,85 @@ h1, h2, h3, h4 { color: var(--text) !important; font-weight: 600; letter-spacing
   position:absolute; top:0; left:0; right:0; height:3px;
   background: linear-gradient(90deg, var(--gold), transparent 60%);
   opacity:0.8;
+  background-size: 200% 100%;
+  animation: sheen 6s linear infinite;
 }
 .qsc-card-tight{
   padding: 18px 20px;
   border-radius: var(--radius-md);
+  background: var(--surface-glass-soft);
+  backdrop-filter: blur(var(--blur-sm)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--blur-sm)) saturate(140%);
 }
 .qsc-card-header{
   display:flex; justify-content:space-between; align-items:center;
   margin-bottom: 14px;
 }
-.qsc-tag{
-  color: var(--gold);
-  font-weight: 600;
-  font-size: 0.85rem;
-  letter-spacing: 0.02em;
-}
+.qsc-tag{ color: var(--gold); font-weight: 600; font-size: 0.85rem; letter-spacing: 0.02em; }
+.qsc-tag-dawn{ color: var(--dawn); font-weight: 600; font-size: 0.85rem; letter-spacing: 0.02em; }
+
+/* Section labels — sentence case + a small gold marker instead of
+   ALL-CAPS + tracking */
 .qsc-label{
   color: var(--text-muted);
   font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.qsc-label::before{
+  content:"";
+  width:4px; height:4px; border-radius:50%;
+  background: var(--gold);
+  opacity:.85;
+  flex: 0 0 auto;
 }
 
-/* Fading divider */
 .qsc-divider{
   height:1px;
   margin: 18px 0;
-  background: linear-gradient(90deg, transparent, var(--border) 20%, var(--border) 80%, transparent);
+  background-image: linear-gradient(90deg, transparent, var(--border-glass) 20%, var(--gold) 50%, var(--border-glass) 80%, transparent);
+  background-size: 200% 100%;
+  animation: sheen 5s linear infinite;
   border:none;
+}
+@keyframes sheen{
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 /* App header / logo block */
-.qsc-header{
-  display:flex; align-items:center; gap:14px; margin-bottom: 6px;
+.qsc-header{ display:flex; align-items:center; gap:14px; margin-bottom: 6px; }
+.qsc-header .emoji{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:48px; height:48px; border-radius:14px;
+  background: radial-gradient(circle at 30% 20%, rgba(212,175,55,0.22), rgba(212,175,55,0.04));
+  border: 1px solid var(--border-glass);
+  font-size:1.7rem;
+  animation: badgeGlow 3.4s ease-in-out infinite;
 }
-.qsc-header .emoji{ font-size:2.1rem; }
-.qsc-header h1{ margin:0; font-size:1.6rem; }
+@keyframes badgeGlow{
+  0%, 100% { box-shadow: 0 0 0 rgba(212,175,55,0); }
+  50%      { box-shadow: 0 0 18px var(--gold-glow); }
+}
+.qsc-header h1{ margin:0; font-size:1.8rem; }
 .qsc-header p{ margin:0; color: var(--text-muted); font-size:0.9rem; }
 
-/* Streak / stat pills */
+/* ---------- Stat pills — "Resting" elevation tier ---------- */
 .qsc-stat{
   position: relative;
   overflow: hidden;
-  background: linear-gradient(160deg, var(--surface-soft) 0%, var(--surface) 100%);
-  border: 1px solid var(--border);
+  background: var(--surface-glass-soft);
+  backdrop-filter: blur(var(--blur-sm)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--blur-sm)) saturate(140%);
+  border: 1px solid var(--border-glass);
   border-radius: var(--radius-md);
   padding: 20px 18px 18px;
   text-align:center;
-  box-shadow: 0 10px 26px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.03);
-  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  transition: transform 0.18s ease, border-color 0.18s ease;
 }
 .qsc-stat::before{
   content:"";
@@ -169,19 +251,80 @@ h1, h2, h3, h4 { color: var(--text) !important; font-weight: 600; letter-spacing
   background: radial-gradient(circle, rgba(212,175,55,0.16) 0%, transparent 70%);
   pointer-events:none;
 }
-.qsc-stat:hover{
-  transform: translateY(-3px);
-  border-color: rgba(212,175,55,0.4);
-  box-shadow: 0 14px 32px rgba(0,0,0,0.4);
+.qsc-stat:hover{ transform: translateY(-2px); border-color: var(--border-gold); }
+.qsc-stat .value{ font-family:'Plus Jakarta Sans',sans-serif; font-size:1.85rem; font-weight:700; color: var(--green); letter-spacing:-0.01em; }
+.qsc-stat .label{ margin-top:4px; font-size:0.78rem; color: var(--text-muted); }
+
+/* ---------- One deliberate entrance — apply to a single hero element
+   per page (Verse of the Day, or the ayah currently in focus). Do not
+   apply this to more than one element at a time. ---------- */
+.qsc-hero{ animation: heroReveal 700ms cubic-bezier(.2,.7,.3,1) both; }
+@keyframes heroReveal{
+  from{ opacity:0; transform: translateY(10px) scale(.99); }
+  to  { opacity:1; transform: translateY(0) scale(1); }
 }
-.qsc-stat .value{ font-size:1.85rem; font-weight:700; color: var(--green); letter-spacing:-0.01em; }
-.qsc-stat .label{ margin-top:4px; font-size:0.78rem; color: var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; }
+
+/* ---------- New: Last-Read widget — "Floating" elevation tier ---------- */
+.qsc-last-read{
+  position: sticky; top: 12px; z-index: 5;
+  display:flex; align-items:center; gap:14px;
+  background: var(--surface-glass);
+  backdrop-filter: blur(var(--blur-lg)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--blur-lg)) saturate(160%);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-lg);
+  padding: 14px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 20px 48px rgba(0,0,0,0.5);
+}
+
+/* ---------- New: segmented tab switcher (Surah / Juz / Bookmarks) ---------- */
+.qsc-tabs{
+  display:inline-flex; gap:4px; padding:4px;
+  background: var(--surface-glass-soft);
+  border: 1px solid var(--border-glass);
+  border-radius: 999px;
+}
+.qsc-tab{
+  padding:8px 18px; border-radius:999px;
+  font-size:0.85rem; color:var(--text-muted);
+  cursor:pointer; transition: background .2s ease, color .2s ease;
+}
+.qsc-tab.active{
+  background: linear-gradient(135deg, #1f7a4d 0%, #14512f 100%);
+  color: var(--text);
+  box-shadow: 0 4px 14px rgba(0,0,0,.3);
+}
+
+/* ---------- New: floating audio pill (Reading screen mini-player) ---------- */
+.qsc-audio-pill{
+  position:fixed; left:50%; bottom:18px; transform:translateX(-50%);
+  display:flex; align-items:center; gap:10px;
+  padding:10px 18px; border-radius:999px;
+  background: var(--surface-glass);
+  backdrop-filter: blur(var(--blur-lg)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--blur-lg)) saturate(160%);
+  border: 1px solid var(--border-gold);
+  box-shadow: 0 16px 40px rgba(0,0,0,.5);
+  z-index: 20;
+  transition: opacity .18s ease;
+}
+.qsc-audio-pill.faded{ opacity: .15; }
+
+/* ---------- New: one-shot success glow (goal complete, 90%+ recitation) --- */
+.qsc-glow-success{ animation: glowPulseOnce 900ms ease-out; }
+@keyframes glowPulseOnce{
+  0%  { box-shadow: 0 0 0 rgba(46,204,113,0); }
+  40% { box-shadow: 0 0 32px rgba(46,204,113,.45); }
+  100%{ box-shadow: 0 0 0 rgba(46,204,113,0); }
+}
 
 /* Buttons */
 .stButton>button, .stDownloadButton>button{
+  font-family: 'Plus Jakarta Sans', sans-serif;
   background: linear-gradient(135deg, #1f7a4d 0%, #14512f 100%);
   color: #f4f7f5;
-  border: 1px solid rgba(212,175,55,0.25);
+  border: 1px solid var(--border-gold);
   border-radius: 999px;
   padding: 0.5em 1.3em;
   font-weight: 500;
@@ -192,29 +335,36 @@ h1, h2, h3, h4 { color: var(--text) !important; font-weight: 600; letter-spacing
   box-shadow: 0 0 0 1px var(--gold) inset;
   transform: translateY(-1px);
 }
+.stButton>button:active, .stDownloadButton>button:active{ transform: translateY(0) scale(0.97); }
 
-/* Inputs, selects, text areas -> curved */
+/* Inputs */
 .stTextInput input, .stTextArea textarea, .stSelectbox [data-baseweb="select"], .stNumberInput input{
-  background: var(--surface-soft) !important;
+  background: var(--surface-glass-soft) !important;
   border-radius: var(--radius-sm) !important;
-  border: 1px solid var(--border) !important;
+  border: 1px solid var(--border-glass) !important;
   color: var(--text) !important;
+}
+.stTextInput input:focus, .stTextArea textarea:focus,
+.stSelectbox [data-baseweb="select"]:focus-within, .stNumberInput input:focus{
+  border-color: var(--gold) !important;
+  box-shadow: 0 0 0 3px rgba(212,175,55,0.15) !important;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 /* Chat bubbles */
 [data-testid="stChatMessage"]{
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--surface-glass-soft);
+  backdrop-filter: blur(var(--blur-sm));
+  -webkit-backdrop-filter: blur(var(--blur-sm));
+  border: 1px solid var(--border-glass);
   border-radius: var(--radius-md);
   padding: 4px 6px;
 }
 
 /* Progress bar */
-.stProgress > div > div{
-  background: linear-gradient(90deg, var(--green), var(--gold));
-}
+.stProgress > div > div{ background: linear-gradient(90deg, var(--green), var(--gold)); }
 
-/* Badges for correct/wrong/missing words in recitation coach */
+/* Recitation-coach word badges */
 .qsc-word{
   display:inline-block; margin:3px 5px; padding:4px 10px;
   border-radius: 999px; font-family:'Amiri', serif; font-size:1.15rem;
@@ -223,109 +373,33 @@ h1, h2, h3, h4 { color: var(--text) !important; font-weight: 600; letter-spacing
 .qsc-word-wrong{ background: rgba(231,76,60,0.15); color:#ff8f80; border:1px solid rgba(231,76,60,0.35); text-decoration: line-through; }
 .qsc-word-missing{ background: rgba(212,175,55,0.12); color: var(--gold); border:1px dashed rgba(212,175,55,0.5); }
 
-/* Verse-of-the-day surah tag top right, like the reference dashboard */
 .qsc-vod-tag{ color: var(--gold); font-weight:600; }
 
-/* Numbered circular ayah badge (Browse Quran / Recitation Coach) */
 .qsc-ayah-badge{
   display:flex; align-items:center; justify-content:center;
   width:34px; height:34px; border-radius:50%;
-  background: var(--surface-soft);
-  border: 1px solid rgba(212,175,55,0.4);
+  background: var(--surface-glass-soft);
+  border: 1px solid var(--border-gold);
   color: var(--gold);
   font-weight:600; font-size:0.85rem;
   margin-top: 6px;
 }
 
-/* Quick-link tiles on the dashboard */
-.qsc-card-tight{
-  transition: transform 0.18s ease, border-color 0.18s ease;
-}
-.qsc-card-tight:hover{
-  transform: translateY(-2px);
-  border-color: rgba(212,175,55,0.4);
-}
+.qsc-card-tight{ transition: transform 0.18s ease, border-color 0.18s ease; }
+.qsc-card-tight:hover{ transform: translateY(-2px); border-color: var(--border-gold); }
 
-/* App header: bigger emoji badge with a soft glow, like a real app icon */
-.qsc-header .emoji{
-  display:inline-flex; align-items:center; justify-content:center;
-  width:48px; height:48px; border-radius:14px;
-  background: radial-gradient(circle at 30% 20%, rgba(212,175,55,0.22), rgba(212,175,55,0.04));
-  border: 1px solid var(--border);
-  font-size:1.7rem;
-}
-.qsc-header h1{ font-size:1.8rem; }
-
-/* subtle scrollbar */
 ::-webkit-scrollbar{ width:8px; height:8px; }
-::-webkit-scrollbar-thumb{ background: var(--surface-soft); border-radius: 8px; }
+::-webkit-scrollbar-thumb{ background: var(--surface-glass-soft); border-radius: 8px; }
 
-/* ===========================================================
-   Motion — gentle entrance animations so the app feels alive
-   instead of static. Staggered by element order.
-   =========================================================== */
-@keyframes fadeSlideUp{
-  from { opacity:0; transform: translateY(14px); }
-  to   { opacity:1; transform: translateY(0); }
-}
-@keyframes fadeIn{
-  from { opacity:0; }
-  to   { opacity:1; }
-}
-
-.qsc-header{ animation: fadeSlideUp 0.55s cubic-bezier(.2,.7,.3,1) both; }
-.qsc-card{ animation: fadeSlideUp 0.6s cubic-bezier(.2,.7,.3,1) both; }
-.qsc-stat{ animation: fadeSlideUp 0.5s cubic-bezier(.2,.7,.3,1) both; }
-[data-testid="column"]:nth-of-type(1) .qsc-stat{ animation-delay: 0.02s; }
-[data-testid="column"]:nth-of-type(2) .qsc-stat{ animation-delay: 0.08s; }
-[data-testid="column"]:nth-of-type(3) .qsc-stat{ animation-delay: 0.14s; }
-[data-testid="column"]:nth-of-type(4) .qsc-stat{ animation-delay: 0.20s; }
-[data-testid="stVerticalBlock"] > [data-testid="stElementContainer"]{ animation: fadeIn 0.5s ease both; }
-
-/* Slowly shifting sheen across the gold divider under the header, echoed
-   by a matching sheen on the card top-accent — reads as "premium" without
-   being loud */
-.qsc-divider, .qsc-card::before{
-  background-size: 200% 100%;
-  animation: sheen 5s linear infinite;
-}
-.qsc-divider{
-  background-image: linear-gradient(90deg, transparent, var(--border) 20%, var(--gold) 50%, var(--border) 80%, transparent);
-}
-.qsc-card::before{
-  background-image: linear-gradient(90deg, transparent, var(--gold) 40%, #f2da8a 50%, var(--gold) 60%, transparent);
-}
-@keyframes sheen{
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-/* App icon badge: slow breathing glow, like a living app logo */
-.qsc-header .emoji{ animation: badgeGlow 3.4s ease-in-out infinite; }
-@keyframes badgeGlow{
-  0%, 100% { box-shadow: 0 0 0 rgba(212,175,55,0); }
-  50%      { box-shadow: 0 0 18px rgba(212,175,55,0.35); }
-}
-
-/* Focus states — inputs & buttons should visibly react, not just hover */
-.stTextInput input:focus, .stTextArea textarea:focus,
-.stSelectbox [data-baseweb="select"]:focus-within, .stNumberInput input:focus{
-  border-color: var(--gold) !important;
-  box-shadow: 0 0 0 3px rgba(212,175,55,0.15) !important;
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
-}
-.stButton>button:active, .stDownloadButton>button:active{ transform: translateY(0) scale(0.98); }
-
-/* Checkboxes / toggles: smoother color transition on state change */
+/* Checkboxes / toggles */
 .stCheckbox, .stToggle{ transition: opacity 0.2s ease; }
 
-/* Sidebar nav (st.navigation) — curved, animated active/hover state so it
-   reads as a real app shell rather than default Streamlit chrome */
+/* Sidebar nav */
 [data-testid="stSidebarNav"] a,
 [data-testid="stSidebarNavLink"]{
   border-radius: var(--radius-sm) !important;
   margin: 2px 8px !important;
-  transition: background 0.18s ease, transform 0.18s ease, padding-left 0.18s ease;
+  transition: background 0.18s ease, padding-left 0.18s ease;
 }
 [data-testid="stSidebarNav"] a:hover,
 [data-testid="stSidebarNavLink"]:hover{
@@ -338,11 +412,20 @@ h1, h2, h3, h4 { color: var(--text) !important; font-weight: 600; letter-spacing
   border-left: 3px solid var(--gold);
 }
 
-/* Expander (Settings panel) — curved + smooth open */
+/* Expander (Settings panel) */
 [data-testid="stExpander"]{
   border-radius: var(--radius-md) !important;
-  border: 1px solid var(--border) !important;
+  border: 1px solid var(--border-glass) !important;
   overflow: hidden;
   transition: border-color 0.2s ease;
 }
-[data-testid="stExpander"]:hover{ border-color: rgba(212,175,55,0.35) !important; }
+[data-testid="stExpander"]:hover{ border-color: var(--border-gold) !important; }
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
