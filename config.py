@@ -31,53 +31,23 @@ APP_TAGLINE = "Read · Listen · Reflect"
 APP_ICON = "📖"
 
 # ---------------------------------------------------------------------------
-# Theme — "Celestial Minimalist": deep indigo-to-teal atmosphere, frosted
-# glass surfaces, gold as the primary accent, emerald for progress/success,
-# a soft dawn-pink used sparingly as a third accent.
-#
-# NOTE: style.css is what actually renders the app right now — it defines
-# its own :root CSS variables and doesn't import this dict. This THEME
-# constant mirrors style.css's values 1:1 so any Python code that wants
-# the palette (e.g. to build an inline chart or an f-string style=""
-# snippet) has one source to read from instead of hardcoding hex codes.
-# If you ever change one, change the other to match.
+# Theme — emerald green, fading/gradient, curved cards
+# Used by assets/style.css via Streamlit's markdown injection.
 # ---------------------------------------------------------------------------
 THEME = {
-    # Base canvas — deep, atmospheric blend from midnight indigo into
-    # emerald-teal, evoking a night sky over a mosque courtyard.
-    "bg_indigo": "#0A1220",
-    "bg_teal": "#06231D",
-    "bg_void": "#04070C",
-    # Glass surfaces — semi-transparent so backdrop-filter blur reads as
-    # frosted glass rather than a flat card.
-    "surface_glass": "rgba(20, 34, 32, 0.55)",
-    "surface_glass_soft": "rgba(16, 28, 26, 0.40)",
-    "border_glass": "rgba(255, 255, 255, 0.08)",
-    "border_gold": "rgba(212, 175, 55, 0.20)",
-    # Accents
-    "accent_gold": "#D4AF37",
-    "accent_gold_glow": "rgba(212, 175, 55, 0.35)",
-    "accent_green": "#2ECC71",
-    "accent_dawn": "#E9AFC9",   # soft dawn-pink — use sparingly, 1-2 spots max
-    # Text
-    "text_primary": "#F5F7F6",
-    "text_secondary": "#B9C9C0",
-    "text_muted": "#7E9186",
-    # Radii
-    "radius_lg": "24px",
+    "bg_start": "#04120c",       # near-black emerald (top of gradient)
+    "bg_end": "#0b2e22",         # deep emerald (bottom of gradient)
+    "surface": "#0f2c22",        # card background
+    "surface_soft": "#123527",   # secondary card background
+    "border": "rgba(212, 175, 55, 0.18)",  # faint gold hairline
+    "accent_gold": "#d4af37",    # gold accent (surah tag, highlights)
+    "accent_green": "#2ecc71",   # bright emerald accent (buttons, success)
+    "text_primary": "#f4f7f5",
+    "text_secondary": "#b9c9c0",
+    "text_muted": "#7e9186",
+    "radius_lg": "22px",
     "radius_md": "16px",
     "radius_sm": "10px",
-    # Glass elevation tiers — see design-blueprint.md section 1
-    "blur_sm": "12px",   # resting tier: stat pills, list rows
-    "blur_md": "20px",   # raised tier: content cards
-    "blur_lg": "32px",   # floating tier: Last-Read widget, audio sheet, modals
-}
-
-FONTS = {
-    "arabic": "'Amiri', 'Traditional Arabic', serif",
-    "urdu": "'Noto Nastaliq Urdu', serif",
-    "display": "'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif",
-    "body": "'Inter', 'Plus Jakarta Sans', -apple-system, sans-serif",
 }
 
 # ---------------------------------------------------------------------------
@@ -133,37 +103,14 @@ HADITH_COLLECTIONS = {
 }
 
 # ---------------------------------------------------------------------------
-# AI chatbot — Gemini (free tier, default) or Claude (paid, if you add credits)
+# AI chatbot (Claude API)
 # ---------------------------------------------------------------------------
-def _resolve_key(name: str) -> str:
-    """Check os.environ (.env locally, or Streamlit Cloud root-level secrets —
-    those are exposed as env vars automatically) and st.secrets directly."""
-    key = os.getenv(name, "")
-    if key:
-        return key
-    try:
-        import streamlit as st
-
-        return st.secrets.get(name, "")
-    except Exception:
-        return ""
-
-
-# "gemini" (default — free tier, no card needed) or "anthropic" (paid, if you
-# add credits at console.anthropic.com). Flip with the AI_PROVIDER env var —
-# no code changes needed either way.
-AI_PROVIDER = os.getenv("AI_PROVIDER", "gemini").lower()
-
-GEMINI_API_KEY = _resolve_key("GEMINI_API_KEY")
-# "gemini-flash-latest" is an alias Google repoints at their current best
-# Flash model — safer than hardcoding a version that gets deprecated.
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-flash-latest")
-
-ANTHROPIC_API_KEY = _resolve_key("ANTHROPIC_API_KEY")
-# Haiku 4.5 is the cheapest current Claude model — only used if
-# AI_PROVIDER=anthropic and you've added credits.
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+# Haiku 4.5 is the cheapest current model with near-frontier quality — good
+# default for a student project. Swap to "claude-sonnet-5" for higher quality
+# at higher cost. See README for how to get a key / free trial credit.
 CHAT_MODEL = os.getenv("CLAUDE_MODEL", "claude-haiku-4-5-20251001")
-CHAT_MAX_TOKENS = 2048
+CHAT_MAX_TOKENS = 1000
 
 # ---------------------------------------------------------------------------
 # Recitation coach
