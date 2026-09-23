@@ -1,360 +1,174 @@
-/* ============================================================================
-   Quran Study Companion — refined dark dashboard
-   Safe drop-in theme for the existing Streamlit class names.
-   Focus: clean, quiet, premium. No layout hacks, no aggressive global styling.
-   ============================================================================ */
+/* ===========================================================
+   Quran Study Companion — Emerald theme
+   Loaded via utils/helpers.py -> inject_css() on every page
+   =========================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Poppins:wght@300;400;500;600;700&family=Noto+Nastaliq+Urdu:wght@400;600&display=swap');
 
-:root {
-  --qsc-bg: #0b0f12;
-  --qsc-side: #071a13;
-  --qsc-side-2: #0a231c;
-  --qsc-card: rgba(15, 23, 26, 0.78);
-  --qsc-card-2: rgba(10, 24, 19, 0.78);
-  --qsc-border: rgba(255,255,255,.085);
-  --qsc-border-gold: rgba(212,175,55,.18);
-  --qsc-text: #f4f7f5;
-  --qsc-sub: #b9c9c0;
-  --qsc-muted: #7e9186;
-  --qsc-gold: #d4af37;
-  --qsc-amber: #f59e0b;
-  --qsc-green: #2ecc71;
-  --qsc-radius: 18px;
-  --qsc-radius-sm: 12px;
-  --qsc-ease: cubic-bezier(.4,0,.2,1);
+:root{
+  --bg-start:#04120c;
+  --bg-end:#0b2e22;
+  --surface:#0f2c22;
+  --surface-soft:#123527;
+  --border:rgba(212,175,55,0.18);
+  --gold:#d4af37;
+  --green:#2ecc71;
+  --text:#f4f7f5;
+  --text-soft:#b9c9c0;
+  --text-muted:#7e9186;
+  --radius-lg:22px;
+  --radius-md:16px;
+  --radius-sm:10px;
 }
 
-/* App background — intentionally simple so Streamlit pages keep their layout. */
-html, body, [data-testid='stAppViewContainer'] {
-  background: var(--qsc-bg) !important;
+/* Whole app background: fading emerald gradient, fixed so it doesn't
+   repeat/scroll oddly */
+[data-testid="stAppViewContainer"], .stApp{
+  background: radial-gradient(120% 120% at 15% 0%, var(--bg-end) 0%, var(--bg-start) 55%, #020a07 100%) fixed;
+  color: var(--text);
 }
 
-[data-testid='stAppViewContainer'] > .main {
-  background:
-    radial-gradient(700px 350px at 75% 0%, rgba(20,65,49,.10), transparent 70%),
-    var(--qsc-bg) !important;
+[data-testid="stHeader"]{
+  background: transparent;
 }
 
-.main .block-container {
-  max-width: 1220px;
-  padding-top: 2rem;
-  padding-bottom: 3rem;
+/* Sidebar: slightly darker, subtle right border, curved edge feel */
+[data-testid="stSidebar"]{
+  background: linear-gradient(180deg, #06180f 0%, #081f16 100%);
+  border-right: 1px solid var(--border);
+}
+[data-testid="stSidebar"] * { color: var(--text-soft) !important; }
+[data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3{
+  color: var(--text) !important;
 }
 
-body, button, input, textarea, select {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+/* Typography */
+html, body, [class*="css"]{
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+h1, h2, h3, h4 { color: var(--text) !important; font-weight: 600; letter-spacing: -0.01em; }
+
+.arabic-text{
+  font-family: 'Amiri', 'Traditional Arabic', serif;
+  direction: rtl;
+  text-align: right;
+  line-height: 2.4;
+  color: var(--text);
+}
+.urdu-text{
+  font-family: 'Noto Nastaliq Urdu', serif;
+  direction: rtl;
+  text-align: right;
+  line-height: 2.6;
+  color: var(--text-soft);
 }
 
-#MainMenu { visibility: hidden; }
-footer { visibility: hidden; }
-
-/* --------------------------------------------------------------------------
-   Sidebar
-   -------------------------------------------------------------------------- */
-section[data-testid='stSidebar'] {
-  background:
-    linear-gradient(180deg, #06150f 0%, #071a13 55%, #06140f 100%) !important;
-  border-right: 1px solid rgba(255,255,255,.055);
+/* ---------- Curved "card" containers ---------- */
+.qsc-card{
+  background: linear-gradient(160deg, var(--surface) 0%, var(--surface-soft) 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px 30px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.35);
 }
-
-section[data-testid='stSidebar'] > div {
-  padding-top: 1rem;
+.qsc-card-tight{
+  padding: 18px 20px;
+  border-radius: var(--radius-md);
 }
-
-section[data-testid='stSidebar'] hr,
-.qsc-divider {
-  border: 0 !important;
-  border-top: 1px solid rgba(255,255,255,.08) !important;
-  margin: 1rem 0 !important;
+.qsc-card-header{
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom: 14px;
 }
-
-section[data-testid='stSidebar'] [data-testid='stSidebarNav'] {
-  padding-top: .2rem;
+.qsc-tag{
+  color: var(--gold);
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
 }
-
-section[data-testid='stSidebar'] [data-testid='stSidebarNav'] a {
-  border-radius: 11px !important;
-  border: 1px solid transparent !important;
-  color: #b4c2bc !important;
-  margin: 2px 0 !important;
-  transition: background .22s var(--qsc-ease), color .22s var(--qsc-ease), border-color .22s var(--qsc-ease) !important;
-}
-
-section[data-testid='stSidebar'] [data-testid='stSidebarNav'] a:hover {
-  color: #f4f7f5 !important;
-  background: rgba(255,255,255,.035) !important;
-}
-
-section[data-testid='stSidebar'] [data-testid='stSidebarNav'] a[aria-current='page'] {
-  color: #edf7f2 !important;
-  background: linear-gradient(90deg, rgba(18,60,43,.85), rgba(10,35,28,.62)) !important;
-  border-color: rgba(63,132,100,.16) !important;
-  box-shadow: inset 3px 0 0 var(--qsc-gold);
-}
-
-/* --------------------------------------------------------------------------
-   Header
-   -------------------------------------------------------------------------- */
-.qsc-header {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin: 0 0 1rem;
-}
-
-.qsc-header .emoji {
-  width: 48px;
-  height: 48px;
-  display: grid;
-  place-items: center;
-  flex: 0 0 48px;
-  border-radius: 14px;
-  background: rgba(255,255,255,.035);
-  border: 1px solid rgba(212,175,55,.16);
-  box-shadow: 0 0 24px rgba(212,175,55,.05);
-  font-size: 1.45rem;
-}
-
-.qsc-header h1 {
-  margin: 0 !important;
-  color: var(--qsc-text) !important;
-  font-size: 2rem !important;
-  line-height: 1.1 !important;
-  font-weight: 700 !important;
-  letter-spacing: -.035em !important;
-}
-
-.qsc-header p {
-  margin: .4rem 0 0 !important;
-  color: var(--qsc-muted) !important;
-  font-size: .92rem !important;
-}
-
-/* --------------------------------------------------------------------------
-   Search bar — quiet Cmd+K appearance without changing Streamlit layout.
-   -------------------------------------------------------------------------- */
-div[data-testid='stTextInput'] input {
-  height: 48px !important;
-  border-radius: 13px !important;
-  padding: 0 14px !important;
-  color: var(--qsc-text) !important;
-  background: rgba(16,22,25,.78) !important;
-  border: 1px solid rgba(255,255,255,.09) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.025) !important;
-}
-
-div[data-testid='stTextInput'] input:focus {
-  border-color: rgba(212,175,55,.28) !important;
-  box-shadow: 0 0 0 2px rgba(212,175,55,.055) !important;
-}
-
-div[data-testid='stTextInput'] input::placeholder {
-  color: #728079 !important;
-}
-
-/* --------------------------------------------------------------------------
-   Metric cards
-   Existing app.py already supplies the 4 columns and .qsc-stat markup.
-   -------------------------------------------------------------------------- */
-.qsc-stat {
-  position: relative;
-  min-height: 112px;
-  overflow: hidden;
-  padding: 18px 18px 15px;
-  border-radius: var(--qsc-radius);
-  background:
-    radial-gradient(120px 70px at 88% 10%, rgba(212,175,55,.07), transparent 75%),
-    var(--qsc-card);
-  border: 1px solid var(--qsc-border);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.025), 0 12px 34px rgba(0,0,0,.20);
-  transition: transform .25s var(--qsc-ease), border-color .25s var(--qsc-ease), box-shadow .25s var(--qsc-ease);
-}
-
-.qsc-stat:hover {
-  transform: translateY(-2px) scale(1.012);
-  border-color: rgba(212,175,55,.20);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.035), 0 16px 40px rgba(0,0,0,.26), 0 0 24px rgba(212,175,55,.035);
-}
-
-.qsc-stat .value {
-  color: var(--qsc-text) !important;
-  font-size: 1.75rem !important;
-  font-weight: 700 !important;
-  letter-spacing: -.035em;
-  line-height: 1.15;
-  font-variant-numeric: tabular-nums;
-}
-
-.qsc-stat .label {
-  margin-top: 9px;
-  color: var(--qsc-muted) !important;
-  font-size: .76rem !important;
-  font-weight: 600 !important;
-  letter-spacing: .04em;
-}
-
-/* Preserve the familiar emoji icons, but make them look deliberate. */
-.qsc-stat .value::first-letter {
-  filter: saturate(.8);
-}
-
-/* --------------------------------------------------------------------------
-   Cards
-   -------------------------------------------------------------------------- */
-.qsc-card {
-  position: relative;
-  overflow: hidden;
-  margin-top: 14px;
-  padding: 20px 22px;
-  border-radius: var(--qsc-radius);
-  background:
-    radial-gradient(500px 180px at 100% 0%, rgba(30,91,69,.07), transparent 72%),
-    linear-gradient(145deg, rgba(10,24,19,.72), rgba(13,19,22,.84));
-  border: 1px solid var(--qsc-border);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.025), 0 14px 45px rgba(0,0,0,.20);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  transition: border-color .25s var(--qsc-ease), box-shadow .25s var(--qsc-ease), transform .25s var(--qsc-ease);
-}
-
-.qsc-card:hover {
-  border-color: rgba(212,175,55,.14);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.03), 0 18px 50px rgba(0,0,0,.23);
-}
-
-.qsc-card-tight {
-  min-height: 105px;
-  padding: 18px 19px;
-}
-
-.qsc-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 4px;
-}
-
-.qsc-label {
-  color: #83948d !important;
-  font-size: .69rem !important;
-  font-weight: 700 !important;
-  letter-spacing: .09em !important;
+.qsc-label{
+  color: var(--text-muted);
+  font-size: 0.8rem;
   text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
-.qsc-vod-tag {
-  color: #dcc66c !important;
-  font-size: .78rem !important;
-  font-weight: 600 !important;
+/* Fading divider */
+.qsc-divider{
+  height:1px;
+  margin: 18px 0;
+  background: linear-gradient(90deg, transparent, var(--border) 20%, var(--border) 80%, transparent);
+  border:none;
 }
 
-.qsc-tag {
-  display: inline-block;
-  padding: 4px 8px;
+/* App header / logo block */
+.qsc-header{
+  display:flex; align-items:center; gap:14px; margin-bottom: 6px;
+}
+.qsc-header .emoji{ font-size:2.1rem; }
+.qsc-header h1{ margin:0; font-size:1.6rem; }
+.qsc-header p{ margin:0; color: var(--text-muted); font-size:0.9rem; }
+
+/* Streak / stat pills */
+.qsc-stat{
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  text-align:center;
+}
+.qsc-stat .value{ font-size:1.6rem; font-weight:700; color: var(--green); }
+.qsc-stat .label{ font-size:0.78rem; color: var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; }
+
+/* Buttons */
+.stButton>button, .stDownloadButton>button{
+  background: linear-gradient(135deg, #1f7a4d 0%, #14512f 100%);
+  color: #f4f7f5;
+  border: 1px solid rgba(212,175,55,0.25);
   border-radius: 999px;
-  color: #d8c16c !important;
-  background: rgba(212,175,55,.055);
-  border: 1px solid rgba(212,175,55,.11);
-  font-size: .7rem !important;
-  font-weight: 600 !important;
+  padding: 0.5em 1.3em;
+  font-weight: 500;
+  transition: all 0.15s ease;
 }
-
-/* --------------------------------------------------------------------------
-   Arabic / Urdu typography
-   -------------------------------------------------------------------------- */
-.arabic-text {
-  direction: rtl;
-  text-align: right;
-  font-family: 'Amiri', 'Scheherazade New', serif !important;
-  color: #f8f8f2 !important;
-  line-height: 2.0 !important;
-  letter-spacing: 0 !important;
-  overflow: visible !important;
-  padding: 12px 4px 8px;
-  text-shadow: 0 2px 18px rgba(0,0,0,.22);
-}
-
-.urdu-text {
-  direction: rtl;
-  text-align: right;
-  font-family: 'Noto Nastaliq Urdu', 'Amiri', serif !important;
-  color: #eef3f0 !important;
-  font-size: 1.2rem !important;
-  line-height: 2.15 !important;
-}
-
-.qsc-card p {
-  color: var(--qsc-sub) !important;
-  line-height: 1.7 !important;
-}
-
-/* --------------------------------------------------------------------------
-   Buttons + progress
-   -------------------------------------------------------------------------- */
-.stButton > button,
-div[data-testid='stFormSubmitButton'] button {
-  min-height: 40px !important;
-  border-radius: 11px !important;
-  color: #f0f5f2 !important;
-  background: #10251d !important;
-  border: 1px solid rgba(212,175,55,.14) !important;
-  font-weight: 600 !important;
-  transition: background .2s var(--qsc-ease), border-color .2s var(--qsc-ease), transform .2s var(--qsc-ease) !important;
-}
-
-.stButton > button:hover,
-div[data-testid='stFormSubmitButton'] button:hover {
-  background: #143025 !important;
-  border-color: rgba(212,175,55,.26) !important;
+.stButton>button:hover, .stDownloadButton>button:hover{
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold) inset;
   transform: translateY(-1px);
 }
 
-[data-testid='stProgress'] > div > div {
-  background: rgba(255,255,255,.05) !important;
-  border-radius: 999px !important;
+/* Inputs, selects, text areas -> curved */
+.stTextInput input, .stTextArea textarea, .stSelectbox [data-baseweb="select"], .stNumberInput input{
+  background: var(--surface-soft) !important;
+  border-radius: var(--radius-sm) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
 }
 
-[data-testid='stProgress'] > div > div > div {
-  background: linear-gradient(90deg, #836d1e, #d4af37) !important;
-  border-radius: 999px !important;
+/* Chat bubbles */
+[data-testid="stChatMessage"]{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 4px 6px;
 }
 
-[data-testid='stAlert'] {
-  border-radius: 12px !important;
-  border: 1px solid rgba(255,255,255,.07) !important;
-  background: rgba(15,29,24,.72) !important;
+/* Progress bar */
+.stProgress > div > div{
+  background: linear-gradient(90deg, var(--green), var(--gold));
 }
 
-[data-testid='stExpander'] details {
-  border-radius: 12px !important;
-  border-color: rgba(255,255,255,.07) !important;
-  background: rgba(255,255,255,.015) !important;
+/* Badges for correct/wrong/missing words in recitation coach */
+.qsc-word{
+  display:inline-block; margin:3px 5px; padding:4px 10px;
+  border-radius: 999px; font-family:'Amiri', serif; font-size:1.15rem;
 }
+.qsc-word-correct{ background: rgba(46,204,113,0.15); color:#7CE8A6; border:1px solid rgba(46,204,113,0.35); }
+.qsc-word-wrong{ background: rgba(231,76,60,0.15); color:#ff8f80; border:1px solid rgba(231,76,60,0.35); text-decoration: line-through; }
+.qsc-word-missing{ background: rgba(212,175,55,0.12); color: var(--gold); border:1px dashed rgba(212,175,55,0.5); }
 
-/* --------------------------------------------------------------------------
-   Simple entrance motion — no transforms on layout containers.
-   -------------------------------------------------------------------------- */
-.qsc-stat, .qsc-card {
-  animation: qsc-fade-up .35s ease both;
-}
+/* Verse-of-the-day surah tag top right, like the reference dashboard */
+.qsc-vod-tag{ color: var(--gold); font-weight:600; }
 
-@keyframes qsc-fade-up {
-  from { opacity: .0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation: none !important;
-    transition: none !important;
-  }
-}
-
-@media (max-width: 900px) {
-  .main .block-container {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-}
+/* subtle scrollbar */
+::-webkit-scrollbar{ width:8px; height:8px; }
+::-webkit-scrollbar-thumb{ background: var(--surface-soft); border-radius: 8px; }
